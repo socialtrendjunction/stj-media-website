@@ -90,4 +90,357 @@ h2{
 input,
 select{
   width:100%;
-  padding:15px
+  padding:15px;
+  margin:8px 0;
+  border-radius:10px;
+  border:1px solid #333;
+  background:#0d0d0d;
+  color:#fff;
+  font-size:15px;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  margin-top:10px;
+  border:0;
+  border-radius:10px;
+  background:#fff;
+  color:#000;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:.85;
+}
+
+#error{
+  color:#ff7070;
+  margin-top:15px;
+}
+
+.hidden{
+  display:none;
+}
+
+.dashboard-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+
+.logout{
+  width:auto;
+  padding:12px 20px;
+  background:transparent;
+  color:#fff;
+  border:1px solid #444;
+}
+
+.success{
+  color:#6cff9b;
+  margin-top:15px;
+}
+
+@media(max-width:600px){
+  .wrap{
+    padding:15px;
+  }
+
+  .card{
+    padding:22px;
+  }
+
+  h1{
+    font-size:30px;
+  }
+
+  .dashboard-head{
+    align-items:flex-start;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<header>
+  <a href="index.html">← STJ Media</a>
+  <span>ADMIN PANEL</span>
+</header>
+
+
+<!-- LOGIN -->
+
+<section id="loginBox" class="card login-card">
+
+  <img src="stj-logo.png" class="logo" alt="STJ Media">
+
+  <p class="eyebrow">STJ MEDIA · PRIVATE AREA</p>
+
+  <h1>Admin Login</h1>
+
+  <p class="muted">
+    Login with your STJ Media admin account.
+  </p>
+
+  <input
+    id="email"
+    type="email"
+    placeholder="Admin email"
+    autocomplete="email"
+  >
+
+  <input
+    id="password"
+    type="password"
+    placeholder="Password"
+    autocomplete="current-password"
+  >
+
+  <button id="loginBtn">
+    Login to Dashboard
+  </button>
+
+  <p id="error"></p>
+
+</section>
+
+
+<!-- DASHBOARD -->
+
+<section id="dashboard" class="hidden">
+
+  <div class="dashboard-head">
+
+    <div>
+      <p class="eyebrow">STJ MEDIA</p>
+      <h1>Admin Dashboard</h1>
+      <p class="muted">
+        Welcome to your private content dashboard.
+      </p>
+    </div>
+
+    <button id="logoutBtn" class="logout">
+      Logout
+    </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>Portfolio Manager</h2>
+
+    <p class="muted">
+      Admin login is working. Portfolio upload and management
+      will be connected to Supabase in the next step.
+    </p>
+
+    <div style="
+      padding:20px;
+      border:1px solid #292929;
+      border-radius:12px;
+      margin-top:20px;
+      color:#999;
+    ">
+      📸 Photo & Video Upload<br><br>
+      ➕ Add Portfolio Work<br><br>
+      🗑️ Delete Work<br><br>
+      👥 Manage Team
+    </div>
+
+  </div>
+
+</section>
+
+</div>
+
+
+<!-- SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL =
+  "https://acuszwigwpfrumkhtdeh.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+const loginBox =
+  document.getElementById("loginBox");
+
+const dashboard =
+  document.getElementById("dashboard");
+
+const email =
+  document.getElementById("email");
+
+const password =
+  document.getElementById("password");
+
+const loginBtn =
+  document.getElementById("loginBtn");
+
+const logoutBtn =
+  document.getElementById("logoutBtn");
+
+const error =
+  document.getElementById("error");
+
+
+async function checkUser(){
+
+  const {
+    data: {
+      session
+    }
+  } = await supabaseClient.auth.getSession();
+
+  if(session){
+
+    showDashboard();
+
+  }else{
+
+    showLogin();
+
+  }
+
+}
+
+
+function showDashboard(){
+
+  loginBox.classList.add("hidden");
+
+  dashboard.classList.remove("hidden");
+
+}
+
+
+function showLogin(){
+
+  loginBox.classList.remove("hidden");
+
+  dashboard.classList.add("hidden");
+
+}
+
+
+loginBtn.addEventListener(
+  "click",
+  async function(){
+
+    error.innerText = "";
+
+    const userEmail =
+      email.value.trim();
+
+    const userPassword =
+      password.value;
+
+    if(!userEmail || !userPassword){
+
+      error.innerText =
+        "Email aur password enter karo.";
+
+      return;
+
+    }
+
+    loginBtn.innerText =
+      "Logging in...";
+
+    loginBtn.disabled = true;
+
+
+    const {
+      data,
+      error: loginError
+    } =
+      await supabaseClient.auth.signInWithPassword({
+
+        email: userEmail,
+
+        password: userPassword
+
+      });
+
+
+    if(loginError){
+
+      error.innerText =
+        loginError.message;
+
+      loginBtn.innerText =
+        "Login to Dashboard";
+
+      loginBtn.disabled = false;
+
+      return;
+
+    }
+
+
+    loginBtn.innerText =
+      "Login successful";
+
+    showDashboard();
+
+  }
+);
+
+
+logoutBtn.addEventListener(
+  "click",
+  async function(){
+
+    await supabaseClient.auth.signOut();
+
+    showLogin();
+
+    email.value = "";
+
+    password.value = "";
+
+  }
+);
+
+
+supabaseClient.auth.onAuthStateChange(
+  function(event, session){
+
+    if(session){
+
+      showDashboard();
+
+    }else{
+
+      showLogin();
+
+    }
+
+  }
+);
+
+
+checkUser();
+
+</script>
+
+</body>
+</html>
