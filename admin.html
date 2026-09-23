@@ -1,9 +1,75 @@
-export const firebaseConfig = {
-  apiKey: "AIzaSyDfbd1PWzD92-bj-B4I-dkm0FnqYXu1h4g",
-  authDomain: "stj-media.firebaseapp.com",
-  projectId: "stj-media",
-  storageBucket: "stj-media.firebasestorage.app",
-  messagingSenderId: "35385801417",
-  appId: "1:35385801417:web:1422af6e45da9bff3d6b18",
-  measurementId: "G-PMKM7T97YJ"
-};
+(function () {
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+
+  if (!emailInput || !passwordInput) {
+    console.error("STJ: Login fields not found.");
+    return;
+  }
+
+  // Existing Supabase client use karo.
+  // Agar pehle se bana hua hai to naya client nahi banayenge.
+  const client =
+    window.supabaseClient ||
+    window.supabase.createClient(
+      "https://acuszwigwpfrumkhtdeh.supabase.co",
+      "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2"
+    );
+
+  const loginButton = [...document.querySelectorAll("button")]
+    .find(button =>
+      button.textContent.trim().toLowerCase().includes("login")
+    );
+
+  if (!loginButton) {
+    console.error("STJ: Login button not found.");
+    return;
+  }
+
+  loginButton.addEventListener("click", async function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+      alert("Email aur password enter karo.");
+      return;
+    }
+
+    loginButton.disabled = true;
+    loginButton.textContent = "Logging in...";
+
+    try {
+      const { data, error } =
+        await client.auth.signInWithPassword({
+          email,
+          password
+        });
+
+      if (error) {
+        alert("Login failed:\n\n" + error.message);
+        return;
+      }
+
+      if (data && data.session) {
+        // Existing admin code session detect karega
+        window.location.reload();
+      } else {
+        alert("Login session nahi mili.");
+      }
+
+    } catch (error) {
+      console.error("STJ Login Error:", error);
+      alert(
+        "Login error:\n\n" +
+        (error.message || "Unknown error")
+      );
+
+    } finally {
+      loginButton.disabled = false;
+      loginButton.textContent = "Login to Dashboard";
+    }
+  }, true);
+})();
