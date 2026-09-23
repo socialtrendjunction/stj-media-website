@@ -3,20 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>STJ Media — Admin</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
   min-height:100vh;
   background:#0b0b0b;
   color:#fff;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
 }
 
 .wrap{
@@ -64,7 +61,6 @@ header span{
   width:80px;
   height:80px;
   object-fit:contain;
-  margin-bottom:15px;
 }
 
 .eyebrow{
@@ -87,8 +83,7 @@ h2{
   line-height:1.6;
 }
 
-input,
-select{
+input,select,textarea{
   width:100%;
   padding:15px;
   margin:8px 0;
@@ -97,6 +92,11 @@ select{
   background:#0d0d0d;
   color:#fff;
   font-size:15px;
+}
+
+textarea{
+  min-height:100px;
+  resize:vertical;
 }
 
 button{
@@ -115,13 +115,31 @@ button:hover{
   opacity:.85;
 }
 
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.hidden{
+  display:none!important;
+}
+
 #error{
   color:#ff7070;
   margin-top:15px;
 }
 
-.hidden{
-  display:none;
+#message{
+  margin-top:15px;
+  line-height:1.5;
+}
+
+.success{
+  color:#6cff9b;
+}
+
+.error{
+  color:#ff7070;
 }
 
 .dashboard-head{
@@ -139,27 +157,58 @@ button:hover{
   border:1px solid #444;
 }
 
-.success{
-  color:#6cff9b;
-  margin-top:15px;
+.work-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:18px;
+  margin-top:20px;
+}
+
+.work{
+  background:#0d0d0d;
+  border:1px solid #292929;
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.work-media{
+  width:100%;
+  aspect-ratio:4/3;
+  object-fit:cover;
+  display:block;
+  background:#111;
+}
+
+.work-info{
+  padding:15px;
+}
+
+.work-info h3{
+  margin:0 0 6px;
+}
+
+.work-info small{
+  color:#888;
+  text-transform:uppercase;
+}
+
+.delete-btn{
+  background:#191919;
+  color:#ff7070;
+  border:1px solid #333;
+}
+
+.file-name{
+  color:#888;
+  font-size:13px;
+  margin-top:5px;
 }
 
 @media(max-width:600px){
-  .wrap{
-    padding:15px;
-  }
-
-  .card{
-    padding:22px;
-  }
-
-  h1{
-    font-size:30px;
-  }
-
-  .dashboard-head{
-    align-items:flex-start;
-  }
+  .wrap{padding:15px}
+  .card{padding:22px}
+  h1{font-size:30px}
+  .dashboard-head{align-items:flex-start}
 }
 </style>
 </head>
@@ -173,9 +222,7 @@ button:hover{
   <span>ADMIN PANEL</span>
 </header>
 
-
 <!-- LOGIN -->
-
 <section id="loginBox" class="card login-card">
 
   <img src="stj-logo.png" class="logo" alt="STJ Media">
@@ -202,9 +249,7 @@ button:hover{
     autocomplete="current-password"
   >
 
-  <button id="loginBtn">
-    Login to Dashboard
-  </button>
+  <button id="loginBtn">Login to Dashboard</button>
 
   <p id="error"></p>
 
@@ -212,7 +257,6 @@ button:hover{
 
 
 <!-- DASHBOARD -->
-
 <section id="dashboard" class="hidden">
 
   <div class="dashboard-head">
@@ -221,7 +265,7 @@ button:hover{
       <p class="eyebrow">STJ MEDIA</p>
       <h1>Admin Dashboard</h1>
       <p class="muted">
-        Welcome to your private content dashboard.
+        Upload and manage your portfolio.
       </p>
     </div>
 
@@ -232,26 +276,57 @@ button:hover{
   </div>
 
 
+  <!-- ADD WORK -->
   <div class="card">
 
-    <h2>Portfolio Manager</h2>
+    <h2>Add New Work</h2>
 
     <p class="muted">
-      Admin login is working. Portfolio upload and management
-      will be connected to Supabase in the next step.
+      Upload a photo or video and publish it to your portfolio.
     </p>
 
-    <div style="
-      padding:20px;
-      border:1px solid #292929;
-      border-radius:12px;
-      margin-top:20px;
-      color:#999;
-    ">
-      📸 Photo & Video Upload<br><br>
-      ➕ Add Portfolio Work<br><br>
-      🗑️ Delete Work<br><br>
-      👥 Manage Team
+    <input
+      id="title"
+      type="text"
+      placeholder="Project title"
+    >
+
+    <select id="category">
+      <option value="design">Graphic Design</option>
+      <option value="shoot">Photo & Video</option>
+      <option value="edit">Video Editing</option>
+      <option value="social">Social Media</option>
+    </select>
+
+    <textarea
+      id="description"
+      placeholder="Short description (optional)"
+    ></textarea>
+
+    <input
+      id="mediaFile"
+      type="file"
+      accept="image/*,video/*"
+    >
+
+    <div id="fileName" class="file-name"></div>
+
+    <button id="uploadBtn">
+      Upload & Publish
+    </button>
+
+    <div id="message"></div>
+
+  </div>
+
+
+  <!-- EXISTING WORK -->
+  <div class="card">
+
+    <h2>Published Work</h2>
+
+    <div id="workList" class="work-list">
+      <p class="muted">Loading...</p>
     </div>
 
   </div>
@@ -260,8 +335,6 @@ button:hover{
 
 </div>
 
-
-<!-- SUPABASE -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -298,46 +371,64 @@ const loginBtn =
 const logoutBtn =
   document.getElementById("logoutBtn");
 
-const error =
+const errorBox =
   document.getElementById("error");
 
+const titleInput =
+  document.getElementById("title");
 
-async function checkUser(){
+const categoryInput =
+  document.getElementById("category");
 
-  const {
-    data: {
-      session
-    }
-  } = await supabaseClient.auth.getSession();
+const descriptionInput =
+  document.getElementById("description");
 
-  if(session){
+const mediaFile =
+  document.getElementById("mediaFile");
 
-    showDashboard();
+const uploadBtn =
+  document.getElementById("uploadBtn");
 
-  }else{
+const message =
+  document.getElementById("message");
 
-    showLogin();
+const workList =
+  document.getElementById("workList");
 
-  }
-
-}
+const fileName =
+  document.getElementById("fileName");
 
 
 function showDashboard(){
 
   loginBox.classList.add("hidden");
-
   dashboard.classList.remove("hidden");
 
+  loadWorks();
 }
 
 
 function showLogin(){
 
   loginBox.classList.remove("hidden");
-
   dashboard.classList.add("hidden");
+}
 
+
+async function checkUser(){
+
+  const {
+    data:{
+      session
+    }
+  } =
+  await supabaseClient.auth.getSession();
+
+  if(session){
+    showDashboard();
+  }else{
+    showLogin();
+  }
 }
 
 
@@ -345,7 +436,7 @@ loginBtn.addEventListener(
   "click",
   async function(){
 
-    error.innerText = "";
+    errorBox.innerText = "";
 
     const userEmail =
       email.value.trim();
@@ -355,49 +446,41 @@ loginBtn.addEventListener(
 
     if(!userEmail || !userPassword){
 
-      error.innerText =
+      errorBox.innerText =
         "Email aur password enter karo.";
 
       return;
-
     }
 
-    loginBtn.innerText =
-      "Logging in...";
-
     loginBtn.disabled = true;
-
+    loginBtn.innerText = "Logging in...";
 
     const {
-      data,
-      error: loginError
+      error:loginError
     } =
-      await supabaseClient.auth.signInWithPassword({
+    await supabaseClient.auth.signInWithPassword({
 
-        email: userEmail,
+      email:userEmail,
+      password:userPassword
 
-        password: userPassword
-
-      });
+    });
 
 
     if(loginError){
 
-      error.innerText =
+      errorBox.innerText =
         loginError.message;
 
+      loginBtn.disabled = false;
       loginBtn.innerText =
         "Login to Dashboard";
 
-      loginBtn.disabled = false;
-
       return;
-
     }
 
-
+    loginBtn.disabled = false;
     loginBtn.innerText =
-      "Login successful";
+      "Login to Dashboard";
 
     showDashboard();
 
@@ -411,18 +494,328 @@ logoutBtn.addEventListener(
 
     await supabaseClient.auth.signOut();
 
-    showLogin();
-
     email.value = "";
-
     password.value = "";
+
+    showLogin();
 
   }
 );
 
 
+mediaFile.addEventListener(
+  "change",
+  function(){
+
+    if(mediaFile.files.length){
+
+      fileName.innerText =
+        mediaFile.files[0].name;
+
+    }else{
+
+      fileName.innerText = "";
+
+    }
+
+  }
+);
+
+
+uploadBtn.addEventListener(
+  "click",
+  async function(){
+
+    message.innerText = "";
+    message.className = "";
+
+    const title =
+      titleInput.value.trim();
+
+    const category =
+      categoryInput.value;
+
+    const description =
+      descriptionInput.value.trim();
+
+    const file =
+      mediaFile.files[0];
+
+
+    if(!title){
+
+      message.className = "error";
+      message.innerText =
+        "Project title enter karo.";
+
+      return;
+    }
+
+
+    if(!file){
+
+      message.className = "error";
+      message.innerText =
+        "Photo ya video select karo.";
+
+      return;
+    }
+
+
+    uploadBtn.disabled = true;
+    uploadBtn.innerText =
+      "Uploading...";
+
+
+    try{
+
+      const {
+        data:{
+          user
+        }
+      } =
+      await supabaseClient.auth.getUser();
+
+
+      if(!user){
+
+        throw new Error(
+          "Admin session expired. Dobara login karo."
+        );
+
+      }
+
+
+      const extension =
+        file.name.includes(".")
+        ? file.name.split(".").pop()
+        : "file";
+
+
+      const safeName =
+        file.name
+          .replace(/[^a-zA-Z0-9._-]/g,"-");
+
+
+      const filePath =
+        Date.now() +
+        "-" +
+        Math.random()
+          .toString(36)
+          .substring(2,8) +
+        "-" +
+        safeName;
+
+
+      const {
+        error:uploadError
+      } =
+      await supabaseClient.storage
+        .from("stj-media")
+        .upload(
+          filePath,
+          file,
+          {
+            cacheControl:"3600",
+            upsert:false
+          }
+        );
+
+
+      if(uploadError){
+
+        throw uploadError;
+
+      }
+
+
+      const {
+        data:publicData
+      } =
+      supabaseClient.storage
+        .from("stj-media")
+        .getPublicUrl(filePath);
+
+
+      const mediaUrl =
+        publicData.publicUrl;
+
+
+      const mediaType =
+        file.type.startsWith("video/")
+        ? "video"
+        : "image";
+
+
+      const {
+        error:dbError
+      } =
+      await supabaseClient
+        .from("portfolio")
+        .insert({
+
+          title:title,
+          category:category,
+          description:description || null,
+          media_url:mediaUrl,
+          media_type:mediaType
+
+        });
+
+
+      if(dbError){
+
+        throw dbError;
+
+      }
+
+
+      message.className = "success";
+      message.innerText =
+        "✅ Work successfully published!";
+
+
+      titleInput.value = "";
+      descriptionInput.value = "";
+      mediaFile.value = "";
+      fileName.innerText = "";
+
+
+      await loadWorks();
+
+
+    }catch(err){
+
+      console.error(err);
+
+      message.className = "error";
+
+      message.innerText =
+        "Upload failed: " +
+        (err.message || "Unknown error");
+
+    }
+
+
+    uploadBtn.disabled = false;
+    uploadBtn.innerText =
+      "Upload & Publish";
+
+  }
+);
+
+
+async function loadWorks(){
+
+  workList.innerHTML =
+    '<p class="muted">Loading...</p>';
+
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient
+    .from("portfolio")
+    .select("*")
+    .order(
+      "created_at",
+      {ascending:false}
+    );
+
+
+  if(error){
+
+    workList.innerHTML =
+      `<p class="error">
+        ${escapeHTML(error.message)}
+      </p>`;
+
+    return;
+  }
+
+
+  if(!data || !data.length){
+
+    workList.innerHTML =
+      `<p class="muted">
+        Abhi koi work publish nahi hua.
+      </p>`;
+
+    return;
+  }
+
+
+  workList.innerHTML =
+    data.map(item => {
+
+      const media =
+        item.media_type === "video"
+
+        ? `
+          <video
+            class="work-media"
+            src="${escapeHTML(item.media_url)}"
+            controls
+            playsinline>
+          </video>
+        `
+
+        : `
+          <img
+            class="work-media"
+            src="${escapeHTML(item.media_url)}"
+            alt="${escapeHTML(item.title)}">
+        `;
+
+
+      return `
+        <div class="work">
+
+          ${media}
+
+          <div class="work-info">
+
+            <small>
+              ${escapeHTML(item.category)}
+            </small>
+
+            <h3>
+              ${escapeHTML(item.title)}
+            </h3>
+
+            ${
+              item.description
+              ? `<p class="muted">
+                   ${escapeHTML(item.description)}
+                 </p>`
+              : ""
+            }
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+
+}
+
+
+function escapeHTML(value){
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
 supabaseClient.auth.onAuthStateChange(
-  function(event, session){
+  function(event,session){
 
     if(session){
 
