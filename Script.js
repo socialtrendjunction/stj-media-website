@@ -1,5 +1,5 @@
 // ======================================================
-// STJ MEDIA — PUBLIC WEBSITE SCRIPT
+// STJ MEDIA — FINAL PUBLIC WEBSITE SCRIPT
 // ======================================================
 
 const SUPABASE_URL =
@@ -10,19 +10,59 @@ const SUPABASE_KEY =
 
 
 // ======================================================
+// LOAD SUPABASE LIBRARY AUTOMATICALLY
+// ======================================================
+
+function loadSupabase() {
+  return new Promise((resolve, reject) => {
+
+    if (window.supabase) {
+      resolve(window.supabase);
+      return;
+    }
+
+    const script = document.createElement("script");
+
+    script.src =
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+
+    script.onload = () => {
+      if (window.supabase) {
+        resolve(window.supabase);
+      } else {
+        reject(new Error("Supabase library not available."));
+      }
+    };
+
+    script.onerror = () => {
+      reject(new Error("Supabase library could not load."));
+    };
+
+    document.head.appendChild(script);
+  });
+}
+
+
+// ======================================================
 // ELEMENTS
 // ======================================================
 
-const portfolio = document.getElementById("portfolio");
-const filters = document.querySelectorAll(".filter");
+const portfolio =
+  document.getElementById("portfolio");
+
+const filters =
+  document.querySelectorAll(".filter");
 
 
 // ======================================================
 // MOBILE MENU
 // ======================================================
 
-const menu = document.querySelector(".menu");
-const nav = document.querySelector(".nav nav");
+const menu =
+  document.querySelector(".menu");
+
+const nav =
+  document.querySelector(".nav nav");
 
 if (menu && nav) {
 
@@ -34,62 +74,7 @@ if (menu && nav) {
 
 
 // ======================================================
-// SCROLL REVEAL
-// ======================================================
-
-function startReveal() {
-
-  const items = document.querySelectorAll(".reveal");
-
-  if (!items.length) return;
-
-
-  // Show items normally if browser doesn't support observer
-  if (!("IntersectionObserver" in window)) {
-
-    items.forEach(item => {
-      item.classList.add("show");
-    });
-
-    return;
-  }
-
-
-  const observer = new IntersectionObserver(
-    entries => {
-
-      entries.forEach(entry => {
-
-        if (entry.isIntersecting) {
-
-          entry.target.classList.add("show");
-
-          observer.unobserve(entry.target);
-
-        }
-
-      });
-
-    },
-    {
-      threshold: 0.12
-    }
-  );
-
-
-  items.forEach(item => {
-    observer.observe(item);
-  });
-
-}
-
-
-// Start reveal immediately
-startReveal();
-
-
-// ======================================================
-// HTML SECURITY
+// HTML ESCAPE
 // ======================================================
 
 function escapeHTML(value) {
@@ -105,22 +90,67 @@ function escapeHTML(value) {
 
 
 // ======================================================
-// PORTFOLIO LOADING
+// SCROLL REVEAL
+// ======================================================
+
+function startReveal() {
+
+  const items =
+    document.querySelectorAll(".reveal");
+
+  if (!items.length) return;
+
+  if (!("IntersectionObserver" in window)) {
+
+    items.forEach(item => {
+      item.classList.add("show");
+    });
+
+    return;
+  }
+
+  const observer =
+    new IntersectionObserver(
+      entries => {
+
+        entries.forEach(entry => {
+
+          if (entry.isIntersecting) {
+
+            entry.target.classList.add("show");
+
+            observer.unobserve(entry.target);
+
+          }
+
+        });
+
+      },
+      {
+        threshold: 0.12
+      }
+    );
+
+  items.forEach(item => {
+    observer.observe(item);
+  });
+
+}
+
+
+// ======================================================
+// LOAD PORTFOLIO
 // ======================================================
 
 async function loadPortfolio(category = "all") {
 
   if (!portfolio) {
-
     console.error(
-      "STJ MEDIA: #portfolio element not found."
+      "STJ MEDIA: #portfolio not found."
     );
-
     return;
   }
 
-
-  // Loading message
   portfolio.innerHTML = `
     <div style="
       grid-column:1/-1;
@@ -132,81 +162,61 @@ async function loadPortfolio(category = "all") {
     </div>
   `;
 
-
   try {
 
     // --------------------------------------------------
-    // SUPABASE REST REQUEST
+    // CONNECT TO SUPABASE
     // --------------------------------------------------
 
-    const url =
-      SUPABASE_URL +
-      "/rest/v1/portfolio" +
-      "?select=id,title,category,description,media_url,media_type,created_at" +
-      "&order=created_at.desc";
+    const supabaseLibrary =
+      await loadSupabase();
 
-
-    const response = await fetch(url, {
-
-      method: "GET",
-
-      headers: {
-
-        "apikey": SUPABASE_KEY,
-
-        "Authorization":
-          "Bearer " + SUPABASE_KEY,
-
-        "Content-Type":
-          "application/json"
-
-      }
-
-    });
+    const supabaseClient =
+      supabaseLibrary.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
 
 
     // --------------------------------------------------
-    // ERROR CHECK
+    // GET PORTFOLIO DATA
     // --------------------------------------------------
 
-    if (!response.ok) {
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from("portfolio")
+      .select(
+        "id,title,category,description,media_url,media_type,created_at"
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
-      const errorText =
-        await response.text();
+
+    // --------------------------------------------------
+    // SUPABASE ERROR
+    // --------------------------------------------------
+
+    if (error) {
 
       console.error(
         "STJ MEDIA SUPABASE ERROR:",
-        response.status,
-        errorText
+        error
       );
 
-      throw new Error(
-        "Portfolio request failed."
-      );
-
+      throw error;
     }
 
-
-    // --------------------------------------------------
-    // GET DATA
-    // --------------------------------------------------
 
     let works =
-      await response.json();
-
-
-    console.log(
-      "STJ MEDIA — Portfolio:",
-      works
-    );
-
-
-    // Make sure data is an array
-    if (!Array.isArray(works)) {
-
-      works = [];
-
-    }
+      Array.isArray(data)
+        ? data
+        : [];
 
 
     // --------------------------------------------------
@@ -218,14 +228,15 @@ async function loadPortfolio(category = "all") {
       const selectedCategory =
         String(category).toLowerCase();
 
+      works =
+        works.filter(item => {
 
-      works = works.filter(item => {
+          return String(
+            item.category || ""
+          ).toLowerCase() ===
+          selectedCategory;
 
-        return String(
-          item.category || ""
-        ).toLowerCase() === selectedCategory;
-
-      });
+        });
 
     }
 
@@ -248,170 +259,172 @@ async function loadPortfolio(category = "all") {
       `;
 
       return;
-
     }
 
 
     // --------------------------------------------------
-    // CREATE CARDS
+    // CREATE PORTFOLIO CARDS
     // --------------------------------------------------
 
-    portfolio.innerHTML = works.map(item => {
+    portfolio.innerHTML =
+      works.map(item => {
+
+        const title =
+          escapeHTML(
+            item.title ||
+            "STJ Media Project"
+          );
+
+        const categoryName =
+          escapeHTML(
+            item.category ||
+            "Work"
+          );
+
+        const description =
+          escapeHTML(
+            item.description ||
+            ""
+          );
+
+        const mediaURL =
+          escapeHTML(
+            item.media_url ||
+            ""
+          );
+
+        let mediaHTML = "";
 
 
-      const title =
-        escapeHTML(
-          item.title ||
-          "STJ Media Project"
-        );
+        // ------------------------------------------------
+        // VIDEO
+        // ------------------------------------------------
+
+        if (
+          String(
+            item.media_type || ""
+          ).toLowerCase() === "video"
+        ) {
+
+          mediaHTML = `
+            <video
+              src="${mediaURL}"
+              controls
+              playsinline
+              preload="metadata"
+              style="
+                width:100%;
+                height:100%;
+                object-fit:cover;
+                display:block;
+              "
+            ></video>
+          `;
+
+        }
 
 
-      const categoryName =
-        escapeHTML(
-          item.category ||
-          "Work"
-        );
+        // ------------------------------------------------
+        // IMAGE
+        // ------------------------------------------------
+
+        else {
+
+          mediaHTML = `
+            <img
+              src="${mediaURL}"
+              alt="${title}"
+              loading="lazy"
+              onerror="this.style.display='none';"
+              style="
+                width:100%;
+                height:100%;
+                object-fit:cover;
+                display:block;
+              "
+            >
+          `;
+
+        }
 
 
-      const description =
-        escapeHTML(
-          item.description ||
-          ""
-        );
+        // ------------------------------------------------
+        // CARD
+        // ------------------------------------------------
 
+        return `
+          <article class="portfolio-card reveal show">
 
-      const mediaURL =
-        escapeHTML(
-          item.media_url ||
-          ""
-        );
+            <div style="
+              aspect-ratio:4/3;
+              overflow:hidden;
+              background:#111;
+              border-radius:16px;
+            ">
 
+              ${mediaHTML}
 
-      let mediaHTML = "";
+            </div>
 
+            <div style="
+              padding:18px 4px;
+            ">
 
-      // ------------------------------------------------
-      // VIDEO
-      // ------------------------------------------------
+              <small style="
+                color:#888;
+                text-transform:uppercase;
+                letter-spacing:1px;
+              ">
+                ${categoryName}
+              </small>
 
-      if (
-        String(
-          item.media_type || ""
-        ).toLowerCase() === "video"
-      ) {
+              <h3 style="
+                margin:7px 0 4px;
+              ">
+                ${title}
+              </h3>
 
-        mediaHTML = `
-          <video
-            src="${mediaURL}"
-            controls
-            playsinline
-            preload="metadata"
-            style="
-              width:100%;
-              height:100%;
-              object-fit:cover;
-              display:block;
-            "
-          ></video>
+              ${
+                description
+                  ? `
+                    <p style="
+                      color:#888;
+                      margin:0;
+                    ">
+                      ${description}
+                    </p>
+                  `
+                  : ""
+              }
+
+            </div>
+
+          </article>
         `;
 
-      }
+      }).join("");
 
 
-      // ------------------------------------------------
-      // IMAGE
-      // ------------------------------------------------
+    // --------------------------------------------------
+    // REVEAL
+    // --------------------------------------------------
 
-      else {
-
-        mediaHTML = `
-          <img
-            src="${mediaURL}"
-            alt="${title}"
-            loading="lazy"
-            style="
-              width:100%;
-              height:100%;
-              object-fit:cover;
-              display:block;
-            "
-          >
-        `;
-
-      }
-
-
-      // ------------------------------------------------
-      // CARD
-      // ------------------------------------------------
-
-      return `
-        <article class="portfolio-card reveal show">
-
-          <div style="
-            aspect-ratio:4/3;
-            overflow:hidden;
-            background:#111;
-            border-radius:16px;
-          ">
-
-            ${mediaHTML}
-
-          </div>
-
-
-          <div style="
-            padding:18px 4px;
-          ">
-
-            <small style="
-              color:#888;
-              text-transform:uppercase;
-              letter-spacing:1px;
-            ">
-              ${categoryName}
-            </small>
-
-
-            <h3 style="
-              margin:7px 0 4px;
-            ">
-              ${title}
-            </h3>
-
-
-            ${
-              description
-                ? `
-                  <p style="
-                    color:#888;
-                    margin:0;
-                  ">
-                    ${description}
-                  </p>
-                `
-                : ""
-            }
-
-          </div>
-
-        </article>
-      `;
-
-    }).join("");
-
-
-    // Re-run reveal for newly created cards
     startReveal();
 
 
-  } catch (error) {
+    console.log(
+      "STJ MEDIA: Portfolio loaded successfully.",
+      works
+    );
+
+  }
+
+  catch (error) {
 
     console.error(
       "STJ MEDIA PORTFOLIO ERROR:",
       error
     );
-
 
     portfolio.innerHTML = `
       <div style="
@@ -435,30 +448,25 @@ async function loadPortfolio(category = "all") {
 
 filters.forEach(button => {
 
-  button.addEventListener("click", () => {
+  button.addEventListener(
+    "click",
+    () => {
 
+      filters.forEach(btn => {
+        btn.classList.remove("active");
+      });
 
-    // Remove active from all
-    filters.forEach(btn => {
-      btn.classList.remove("active");
-    });
+      button.classList.add("active");
 
+      const category =
+        button.getAttribute(
+          "data-filter"
+        ) || "all";
 
-    // Add active to clicked button
-    button.classList.add("active");
+      loadPortfolio(category);
 
-
-    // Get category
-    const category =
-      button.getAttribute(
-        "data-filter"
-      ) || "all";
-
-
-    // Load selected category
-    loadPortfolio(category);
-
-  });
+    }
+  );
 
 });
 
