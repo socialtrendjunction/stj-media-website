@@ -7,68 +7,145 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_KEY
 );
 
-const loginForm = document.getElementById("login-form");
-const loginScreen = document.getElementById("login-screen");
-const dashboard = document.getElementById("dashboard");
-const loginError = document.getElementById("login-error");
-const loginBtn = document.getElementById("login-btn");
+document.addEventListener("DOMContentLoaded", () => {
 
-loginForm.addEventListener("submit", async function (e) {
-  e.preventDefault();
+  const loginForm = document.getElementById("login-form");
+  const loginScreen = document.getElementById("login-screen");
+  const dashboard = document.getElementById("dashboard");
+  const loginError = document.getElementById("login-error");
+  const loginBtn = document.getElementById("login-btn");
 
-  loginError.textContent = "";
-  loginBtn.disabled = true;
-  loginBtn.textContent = "Logging in...";
+  function showDashboard() {
+    if (loginScreen) loginScreen.classList.add("hidden");
+    if (dashboard) dashboard.classList.remove("hidden");
+  }
 
-  const email = document.getElementById("login-email").value.trim();
-  const password = document.getElementById("login-password").value;
+  function showLogin() {
+    if (loginScreen) loginScreen.classList.remove("hidden");
+    if (dashboard) dashboard.classList.add("hidden");
+  }
 
-  try {
-    const { data, error } =
-      await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
+  /* LOGIN */
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
 
-    if (error) {
-      loginError.textContent = error.message;
-      return;
+      // VERY IMPORTANT — page refresh rokta hai
+      e.preventDefault();
+      e.stopPropagation();
+
+      loginError.textContent = "";
+
+      const email =
+        document.getElementById("login-email").value.trim();
+
+      const password =
+        document.getElementById("login-password").value;
+
+      if (!email || !password) {
+        loginError.textContent =
+          "Email aur password enter karo.";
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Logging in...";
+
+      try {
+
+        const { data, error } =
+          await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+          });
+
+        if (error) {
+          console.error(error);
+          loginError.textContent = error.message;
+          return;
+        }
+
+        if (data && data.session) {
+          document.getElementById("login-password").value = "";
+          showDashboard();
+        } else {
+          loginError.textContent =
+            "Login nahi hua. Dobara try karo.";
+        }
+
+      } catch (error) {
+
+        console.error(error);
+
+        loginError.textContent =
+          error.message || "Login failed.";
+
+      } finally {
+
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
+
+      }
+    });
+  }
+
+  /* CHECK ALREADY LOGGED IN */
+  async function checkSession() {
+
+    try {
+
+      const { data, error } =
+        await supabaseClient.auth.getSession();
+
+      if (error) {
+        console.error(error);
+        showLogin();
+        return;
+      }
+
+      if (data && data.session) {
+        showDashboard();
+      } else {
+        showLogin();
+      }
+
+    } catch (error) {
+
+      console.error(error);
+      showLogin();
+
+    }
+  }
+
+  /* LOGOUT */
+  const logoutBtn = document.getElementById("logout-btn");
+
+  if (logoutBtn) {
+
+    logoutBtn.addEventListener("click", async () => {
+
+      await supabaseClient.auth.signOut();
+
+      showLogin();
+
+      document.getElementById("login-email").value = "";
+      document.getElementById("login-password").value = "";
+
+    });
+
+  }
+
+  /* AUTH CHANGE */
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+
+    if (session) {
+      showDashboard();
+    } else {
+      showLogin();
     }
 
-    if (data.session) {
-      loginScreen.classList.add("hidden");
-      dashboard.classList.remove("hidden");
-    }
+  });
 
-  } catch (err) {
-    loginError.textContent = err.message || "Login failed.";
-  } finally {
-    loginBtn.disabled = false;
-    loginBtn.textContent = "Login";
-  }
+  checkSession();
+
 });
-
-async function checkLogin() {
-  const { data } = await supabaseClient.auth.getSession();
-
-  if (data.session) {
-    loginScreen.classList.add("hidden");
-    dashboard.classList.remove("hidden");
-  } else {
-    loginScreen.classList.remove("hidden");
-    dashboard.classList.add("hidden");
-  }
-}
-
-supabaseClient.auth.onAuthStateChange(function (event, session) {
-  if (session) {
-    loginScreen.classList.add("hidden");
-    dashboard.classList.remove("hidden");
-  } else {
-    loginScreen.classList.remove("hidden");
-    dashboard.classList.add("hidden");
-  }
-});
-
-checkLogin();
 </script>
