@@ -247,4 +247,90 @@ async function loadPortfolio(category = "all") {
 
           <div style="padding:18px 4px;">
 
-            <
+            <small style="
+              color:#888;
+              text-transform:uppercase;
+              letter-spacing:1px;
+            ">
+              ${categoryName}
+            </small>
+
+            <h3 style="
+              margin:7px 0 4px;
+            ">
+              ${title}
+            </h3>
+
+            ${
+              description
+                ? `
+                  <p style="
+                    color:#888;
+                    margin:0;
+                  ">
+                    ${description}
+                  </p>
+                `
+                : ""
+            }
+
+          </div>
+
+        </article>
+      `;
+
+    }).join("");
+
+
+  } catch (error) {
+
+    console.error(
+      "STJ MEDIA ERROR:",
+      error
+    );
+
+    portfolio.innerHTML = `
+      <div style="
+        grid-column:1/-1;
+        padding:40px;
+        text-align:center;
+        color:#ff7777;
+      ">
+        Portfolio load nahi ho pa raha.
+      </div>
+    `;
+
+  }
+
+}
+
+
+// ==========================
+// FILTER BUTTONS
+// ==========================
+
+filters.forEach(button => {
+
+  button.addEventListener("click", () => {
+
+    filters.forEach(btn => {
+      btn.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    const category =
+      button.getAttribute("data-filter") || "all";
+
+    loadPortfolio(category);
+
+  });
+
+});
+
+
+// ==========================
+// INITIAL PORTFOLIO LOAD
+// ==========================
+
+loadPortfolio("all");
