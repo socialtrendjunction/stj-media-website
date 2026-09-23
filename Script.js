@@ -1,5 +1,3 @@
-// STJ MEDIA — PUBLIC WEBSITE SCRIPT
-
 const SUPABASE_URL = "https://acuszwigwpfrumkhtdeh.supabase.co";
 const SUPABASE_KEY = "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
 
@@ -7,10 +5,14 @@ const portfolio = document.getElementById("portfolio");
 const filters = document.querySelectorAll(".filter");
 
 
-// ===============================
-// MOBILE MENU
-// ===============================
+// SUPABASE CLIENT
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
+
+// MOBILE MENU
 const menu = document.querySelector(".menu");
 const nav = document.querySelector(".nav nav");
 
@@ -21,39 +23,32 @@ if (menu && nav) {
 }
 
 
-// ===============================
 // SCROLL REVEAL
-// ===============================
+function setupReveal() {
 
-const revealItems = document.querySelectorAll(".reveal");
+  const revealItems = document.querySelectorAll(".reveal");
 
-if ("IntersectionObserver" in window) {
+  if (!("IntersectionObserver" in window)) {
+    revealItems.forEach(item => item.classList.add("show"));
+    return;
+  }
 
   const observer = new IntersectionObserver(
     entries => {
-
       entries.forEach(entry => {
-
         if (entry.isIntersecting) {
           entry.target.classList.add("show");
         }
-
       });
-
     },
-    {
-      threshold: 0.12
-    }
+    { threshold: 0.12 }
   );
 
   revealItems.forEach(item => observer.observe(item));
 }
 
 
-// ===============================
-// ESCAPE HTML
-// ===============================
-
+// HTML ESCAPE
 function escapeHTML(value) {
 
   return String(value ?? "")
@@ -66,10 +61,7 @@ function escapeHTML(value) {
 }
 
 
-// ===============================
 // LOAD PORTFOLIO
-// ===============================
-
 async function loadPortfolio(category = "all") {
 
   if (!portfolio) return;
@@ -87,61 +79,37 @@ async function loadPortfolio(category = "all") {
 
   try {
 
-    const url =
-      `${SUPABASE_URL}/rest/v1/portfolio` +
-      `?select=id,title,category,description,media_url,media_type,created_at` +
-      `&order=created_at.desc`;
-
-    const response = await fetch(url, {
-
-      method: "GET",
-
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
-        "Content-Type": "application/json"
-      }
-
-    });
+    const { data, error } = await supabaseClient
+      .from("portfolio")
+      .select("id,title,category,description,media_url,media_type,created_at")
+      .order("created_at", { ascending: false });
 
 
-    if (!response.ok) {
-
-      const errorText = await response.text();
-
-      console.error("Supabase error:", errorText);
-
-      throw new Error(errorText || "Portfolio data could not be loaded.");
-
+    if (error) {
+      console.error("Supabase portfolio error:", error);
+      throw error;
     }
 
 
-    let data = await response.json();
-
-    console.log("STJ Portfolio data:", data);
+    console.log("STJ Portfolio:", data);
 
 
-    // ===============================
+    let works = data || [];
+
+
     // CATEGORY FILTER
-    // ===============================
-
     if (category !== "all") {
 
-      data = data.filter(item => {
-
-        return String(item.category || "").toLowerCase() ===
-               String(category).toLowerCase();
-
-      });
+      works = works.filter(item =>
+        String(item.category || "").toLowerCase() ===
+        String(category).toLowerCase()
+      );
 
     }
 
 
-    // ===============================
     // NO WORK
-    // ===============================
-
-    if (!data.length) {
+    if (!works.length) {
 
       portfolio.innerHTML = `
         <div style="
@@ -158,24 +126,18 @@ async function loadPortfolio(category = "all") {
     }
 
 
-    // ===============================
-    // CREATE CARDS
-    // ===============================
+    // CREATE WORK CARDS
+    portfolio.innerHTML = works.map(item => {
 
-    portfolio.innerHTML = data.map(item => {
-
-
-      let mediaHTML = "";
+      let media = "";
 
 
       // VIDEO
       if (
-        item.media_type === "video" ||
-        (item.media_url &&
-         /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(item.media_url))
+        String(item.media_type || "").toLowerCase() === "video"
       ) {
 
-        mediaHTML = `
+        media = `
           <video
             src="${escapeHTML(item.media_url)}"
             controls
@@ -196,10 +158,10 @@ async function loadPortfolio(category = "all") {
       // IMAGE
       else {
 
-        mediaHTML = `
+        media = `
           <img
             src="${escapeHTML(item.media_url)}"
-            alt="${escapeHTML(item.title || "STJ Media work")}"
+            alt="${escapeHTML(item.title || "STJ Media Work")}"
             loading="lazy"
             style="
               width:100%;
@@ -207,6 +169,7 @@ async function loadPortfolio(category = "all") {
               object-fit:cover;
               display:block;
             "
+            onerror="this.style.display='none';"
           >
         `;
 
@@ -223,14 +186,11 @@ async function loadPortfolio(category = "all") {
             border-radius:16px;
           ">
 
-            ${mediaHTML}
+            ${media}
 
           </div>
 
-
-          <div style="
-            padding:18px 4px;
-          ">
+          <div style="padding:18px 4px;">
 
             <small style="
               color:#888;
@@ -240,13 +200,11 @@ async function loadPortfolio(category = "all") {
               ${escapeHTML(item.category || "Work")}
             </small>
 
-
             <h3 style="
               margin:7px 0 4px;
             ">
               ${escapeHTML(item.title || "STJ Media Project")}
             </h3>
-
 
             ${
               item.description
@@ -269,6 +227,9 @@ async function loadPortfolio(category = "all") {
     }).join("");
 
 
+    setupReveal();
+
+
   } catch (error) {
 
     console.error("STJ Portfolio Error:", error);
@@ -289,35 +250,25 @@ async function loadPortfolio(category = "all") {
 }
 
 
-// ===============================
 // FILTER BUTTONS
-// ===============================
-
 filters.forEach(button => {
 
   button.addEventListener("click", () => {
 
-    filters.forEach(btn => {
-      btn.classList.remove("active");
-    });
-
+    filters.forEach(btn =>
+      btn.classList.remove("active")
+    );
 
     button.classList.add("active");
 
-
-    const category =
-      button.dataset.filter || "all";
-
-
-    loadPortfolio(category);
+    loadPortfolio(
+      button.dataset.filter || "all"
+    );
 
   });
 
 });
 
 
-// ===============================
 // INITIAL LOAD
-// ===============================
-
 loadPortfolio("all");
