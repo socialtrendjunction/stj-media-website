@@ -3,132 +3,555 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>STJ Media — Admin</title>
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:#0b0b0b;color:#fff;font-family:Arial,sans-serif}
-.wrap{width:100%;max-width:1100px;margin:auto;padding:25px}
-header{display:flex;justify-content:space-between;align-items:center;padding:15px 0 30px;border-bottom:1px solid #292929}
-header a{color:#fff;text-decoration:none;font-weight:bold}
-header span{color:#777;font-size:12px;letter-spacing:2px}
-.card{background:#151515;border:1px solid #292929;border-radius:20px;padding:30px;margin-top:25px}
-.login-card{max-width:430px;margin:80px auto 0;text-align:center}
-.logo{width:80px;height:80px;object-fit:contain}
-.eyebrow{color:#888;font-size:12px;letter-spacing:2px}
-h1{font-size:36px;margin:10px 0}
-h2{margin-top:0}
-.muted{color:#888;line-height:1.6}
-input,select,textarea{width:100%;padding:15px;margin:8px 0;border-radius:10px;border:1px solid #333;background:#0d0d0d;color:#fff;font-size:15px}
-textarea{min-height:100px;resize:vertical}
-button{width:100%;padding:15px;margin-top:10px;border:0;border-radius:10px;background:#fff;color:#000;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.5}
-.hidden{display:none!important}
-#error{color:#ff7070;margin-top:15px}
-.success{color:#6cff9b;margin-top:15px}
-.error{color:#ff7070;margin-top:15px}
-.dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:20px}
-.logout{width:auto;padding:12px 20px;background:transparent;color:#fff;border:1px solid #444}
-.work-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:20px}
-.work{background:#0d0d0d;border:1px solid #292929;border-radius:14px;overflow:hidden}
-.work-media{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#111}
-.work-info{padding:15px}
-.work-info h3{margin:6px 0}
-.work-info small{color:#888;text-transform:uppercase}
-.file-name{color:#888;font-size:13px;margin-top:5px}
+
+body{
+margin:0;
+min-height:100vh;
+background:#0b0b0b;
+color:#fff;
+font-family:Arial,sans-serif
+}
+
+.wrap{
+width:100%;
+max-width:1100px;
+margin:auto;
+padding:25px
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 0 30px;
+border-bottom:1px solid #292929
+}
+
+header a{
+color:#fff;
+text-decoration:none;
+font-weight:bold
+}
+
+header span{
+color:#777;
+font-size:12px;
+letter-spacing:2px
+}
+
+.card{
+background:#151515;
+border:1px solid #292929;
+border-radius:20px;
+padding:30px;
+margin-top:25px
+}
+
+.login-card{
+max-width:430px;
+margin:80px auto 0;
+text-align:center
+}
+
+.logo{
+width:80px;
+height:80px;
+object-fit:contain
+}
+
+.eyebrow{
+color:#888;
+font-size:12px;
+letter-spacing:2px
+}
+
+h1{
+font-size:36px;
+margin:10px 0
+}
+
+h2{
+margin-top:0
+}
+
+.muted{
+color:#888;
+line-height:1.6
+}
+
+input,select,textarea{
+width:100%;
+padding:15px;
+margin:8px 0;
+border-radius:10px;
+border:1px solid #333;
+background:#0d0d0d;
+color:#fff;
+font-size:15px
+}
+
+textarea{
+min-height:100px;
+resize:vertical
+}
+
+button{
+width:100%;
+padding:15px;
+margin-top:10px;
+border:0;
+border-radius:10px;
+background:#fff;
+color:#000;
+font-weight:bold;
+cursor:pointer
+}
+
+button:disabled{
+opacity:.5;
+cursor:not-allowed
+}
+
+.hidden{
+display:none!important
+}
+
+#error{
+color:#ff7070;
+margin-top:15px
+}
+
+.success{
+color:#6cff9b;
+margin-top:15px
+}
+
+.error{
+color:#ff7070;
+margin-top:15px
+}
+
+.dashboard-head{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:20px
+}
+
+.logout{
+width:auto;
+padding:12px 20px;
+background:transparent;
+color:#fff;
+border:1px solid #444
+}
+
+
+/* ================================
+   TABS
+================================ */
+
+.tabs{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:25px
+}
+
+.tab{
+width:auto;
+margin:0;
+padding:12px 18px;
+background:#0d0d0d;
+color:#888;
+border:1px solid #333
+}
+
+.tab.active{
+background:#fff;
+color:#000;
+border-color:#fff
+}
+
+
+/* ================================
+   WORK GRID
+================================ */
+
+.work-list{
+display:grid;
+grid-template-columns:
+repeat(auto-fit,minmax(240px,1fr));
+gap:18px;
+margin-top:20px
+}
+
+.work{
+background:#0d0d0d;
+border:1px solid #292929;
+border-radius:14px;
+overflow:hidden
+}
+
+.work-media{
+width:100%;
+aspect-ratio:4/3;
+object-fit:cover;
+display:block;
+background:#111
+}
+
+.work-info{
+padding:15px
+}
+
+.work-info h3{
+margin:6px 0
+}
+
+.work-info small{
+color:#888;
+text-transform:uppercase;
+letter-spacing:1px
+}
+
+.file-name{
+color:#888;
+font-size:13px;
+margin-top:5px
+}
+
+
+/* ================================
+   ACTION BUTTONS
+================================ */
+
+.actions{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+margin-top:15px
+}
+
+.action-btn{
+width:100%;
+margin:0;
+padding:11px 8px;
+font-size:13px
+}
+
+.archive-btn{
+background:#252525;
+color:#fff;
+border:1px solid #444
+}
+
+.restore-btn{
+background:#252525;
+color:#fff;
+border:1px solid #444
+}
+
+.bin-btn{
+background:#252525;
+color:#fff;
+border:1px solid #444
+}
+
+.delete-btn{
+background:#8b1e1e;
+color:#fff
+}
+
+.live-badge{
+display:inline-block;
+margin-top:8px;
+padding:5px 9px;
+border-radius:20px;
+background:#12351f;
+color:#6cff9b;
+font-size:11px
+}
+
+.archive-badge{
+display:inline-block;
+margin-top:8px;
+padding:5px 9px;
+border-radius:20px;
+background:#332b12;
+color:#ffd76c;
+font-size:11px
+}
+
+.bin-badge{
+display:inline-block;
+margin-top:8px;
+padding:5px 9px;
+border-radius:20px;
+background:#351414;
+color:#ff7070;
+font-size:11px
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
 @media(max-width:600px){
-.wrap{padding:15px}
-.card{padding:22px}
-h1{font-size:30px}
-.dashboard-head{align-items:flex-start}
+
+.wrap{
+padding:15px
+}
+
+.card{
+padding:22px
+}
+
+h1{
+font-size:30px
+}
+
+.dashboard-head{
+align-items:flex-start
+}
+
+.actions{
+grid-template-columns:1fr
+}
+
 }
 </style>
 </head>
+
 
 <body>
 
 <div class="wrap">
 
 <header>
+
 <a href="index.html">← STJ Media</a>
+
 <span>ADMIN PANEL</span>
+
 </header>
+
+
+<!-- ==========================================
+     LOGIN
+========================================== -->
 
 <section id="loginBox" class="card login-card">
 
-<img src="stj-logo.png" class="logo" alt="STJ Media">
+<img
+src="stj-logo.png"
+class="logo"
+alt="STJ Media"
+>
 
-<p class="eyebrow">STJ MEDIA · PRIVATE AREA</p>
+<p class="eyebrow">
+STJ MEDIA · PRIVATE AREA
+</p>
 
-<h1>Admin Login</h1>
+<h1>
+Admin Login
+</h1>
 
-<p class="muted">Login with your STJ Media admin account.</p>
+<p class="muted">
+Login with your STJ Media admin account.
+</p>
 
-<input id="email" type="email" placeholder="Admin email">
+<input
+id="email"
+type="email"
+placeholder="Admin email"
+>
 
-<input id="password" type="password" placeholder="Password">
+<input
+id="password"
+type="password"
+placeholder="Password"
+>
 
-<button id="loginBtn">Login to Dashboard</button>
+<button id="loginBtn">
+Login to Dashboard
+</button>
 
 <p id="error"></p>
 
 </section>
 
 
+<!-- ==========================================
+     DASHBOARD
+========================================== -->
+
 <section id="dashboard" class="hidden">
+
 
 <div class="dashboard-head">
 
 <div>
-<p class="eyebrow">STJ MEDIA</p>
-<h1>Admin Dashboard</h1>
-<p class="muted">Upload and manage your portfolio.</p>
+
+<p class="eyebrow">
+STJ MEDIA
+</p>
+
+<h1>
+Admin Dashboard
+</h1>
+
+<p class="muted">
+Upload and manage your portfolio.
+</p>
+
 </div>
 
-<button id="logoutBtn" class="logout">Logout</button>
+
+<button
+id="logoutBtn"
+class="logout"
+>
+Logout
+</button>
 
 </div>
 
+
+<!-- ==========================================
+     ADD WORK
+========================================== -->
 
 <div class="card">
 
-<h2>Add New Work</h2>
+<h2>
+Add New Work
+</h2>
 
 <p class="muted">
 Upload a photo or video and publish it to your portfolio.
 </p>
 
-<input id="title" type="text" placeholder="Project title">
+
+<input
+id="title"
+type="text"
+placeholder="Project title"
+>
+
 
 <select id="category">
-<option value="design">Graphic Design</option>
-<option value="shoot">Photo & Video</option>
-<option value="edit">Video Editing</option>
-<option value="social">Social Media</option>
+
+<option value="design">
+Graphic Design
+</option>
+
+<option value="shoot">
+Photo & Video
+</option>
+
+<option value="edit">
+Video Editing
+</option>
+
+<option value="social">
+Social Media
+</option>
+
 </select>
 
-<textarea id="description" placeholder="Short description (optional)"></textarea>
 
-<input id="mediaFile" type="file" accept="image/*,video/*">
+<textarea
+id="description"
+placeholder="Short description (optional)"
+></textarea>
 
-<div id="fileName" class="file-name"></div>
 
-<button id="uploadBtn">Upload & Publish</button>
+<input
+id="mediaFile"
+type="file"
+accept="image/*,video/*"
+>
+
+
+<div
+id="fileName"
+class="file-name"
+></div>
+
+
+<button id="uploadBtn">
+Upload & Publish
+</button>
+
 
 <div id="message"></div>
 
 </div>
 
 
+<!-- ==========================================
+     MANAGE WORK
+========================================== -->
+
 <div class="card">
 
-<h2>Published Work</h2>
+<h2>
+Manage Work
+</h2>
 
-<div id="workList" class="work-list">
-<p class="muted">Loading...</p>
+<p class="muted">
+Live, archived and deleted projects manage karo.
+</p>
+
+
+<div class="tabs">
+
+<button
+class="tab active"
+data-tab="live"
+>
+Live
+</button>
+
+
+<button
+class="tab"
+data-tab="archive"
+>
+Archive
+</button>
+
+
+<button
+class="tab"
+data-tab="bin"
+>
+Bin
+</button>
+
+</div>
+
+
+<div
+id="workList"
+class="work-list"
+>
+
+<p class="muted">
+Loading...
+</p>
+
 </div>
 
 </div>
+
 
 </section>
 
@@ -137,7 +560,13 @@ Upload a photo or video and publish it to your portfolio.
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
 <script>
+
+
+// ======================================================
+// SUPABASE
+// ======================================================
 
 const SUPABASE_URL =
 "https://acuszwigwpfrumkhtdeh.supabase.co";
@@ -145,31 +574,79 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
 
+
 const supabaseClient =
-supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
 
 
-const loginBox=document.getElementById("loginBox");
-const dashboard=document.getElementById("dashboard");
-const email=document.getElementById("email");
-const password=document.getElementById("password");
-const loginBtn=document.getElementById("loginBtn");
-const logoutBtn=document.getElementById("logoutBtn");
-const errorBox=document.getElementById("error");
+// ======================================================
+// ELEMENTS
+// ======================================================
 
-const titleInput=document.getElementById("title");
-const categoryInput=document.getElementById("category");
-const descriptionInput=document.getElementById("description");
-const mediaFile=document.getElementById("mediaFile");
-const uploadBtn=document.getElementById("uploadBtn");
-const message=document.getElementById("message");
-const workList=document.getElementById("workList");
-const fileName=document.getElementById("fileName");
+const loginBox =
+document.getElementById("loginBox");
 
+const dashboard =
+document.getElementById("dashboard");
+
+const email =
+document.getElementById("email");
+
+const password =
+document.getElementById("password");
+
+const loginBtn =
+document.getElementById("loginBtn");
+
+const logoutBtn =
+document.getElementById("logoutBtn");
+
+const errorBox =
+document.getElementById("error");
+
+const titleInput =
+document.getElementById("title");
+
+const categoryInput =
+document.getElementById("category");
+
+const descriptionInput =
+document.getElementById("description");
+
+const mediaFile =
+document.getElementById("mediaFile");
+
+const uploadBtn =
+document.getElementById("uploadBtn");
+
+const message =
+document.getElementById("message");
+
+const workList =
+document.getElementById("workList");
+
+const fileName =
+document.getElementById("fileName");
+
+const tabs =
+document.querySelectorAll(".tab");
+
+
+// Current tab
+let currentTab = "live";
+
+
+// ======================================================
+// LOGIN / DASHBOARD
+// ======================================================
 
 function showDashboard(){
 
 loginBox.classList.add("hidden");
+
 dashboard.classList.remove("hidden");
 
 loadWorks();
@@ -180,6 +657,7 @@ loadWorks();
 function showLogin(){
 
 loginBox.classList.remove("hidden");
+
 dashboard.classList.add("hidden");
 
 }
@@ -187,65 +665,109 @@ dashboard.classList.add("hidden");
 
 async function checkUser(){
 
-const {data:{session}} =
+const {
+data:{
+session
+}
+} =
 await supabaseClient.auth.getSession();
 
+
 if(session){
+
 showDashboard();
+
 }else{
+
 showLogin();
-}
 
 }
 
+}
 
-loginBtn.addEventListener("click",async()=>{
+
+// ======================================================
+// LOGIN
+// ======================================================
+
+loginBtn.addEventListener(
+"click",
+async()=>{
 
 errorBox.innerText="";
 
-if(!email.value.trim() || !password.value){
 
-errorBox.innerText="Email aur password enter karo.";
+if(
+!email.value.trim() ||
+!password.value
+){
+
+errorBox.innerText =
+"Email aur password enter karo.";
+
 return;
 
 }
 
-loginBtn.disabled=true;
-loginBtn.innerText="Logging in...";
 
-const {error:loginError} =
+loginBtn.disabled=true;
+
+loginBtn.innerText =
+"Logging in...";
+
+
+const {
+error:loginError
+} =
 await supabaseClient.auth.signInWithPassword({
 
-email:email.value.trim(),
-password:password.value
+email:
+email.value.trim(),
+
+password:
+password.value
 
 });
 
 
 if(loginError){
 
-errorBox.innerText=loginError.message;
+errorBox.innerText =
+loginError.message;
 
 loginBtn.disabled=false;
-loginBtn.innerText="Login to Dashboard";
+
+loginBtn.innerText =
+"Login to Dashboard";
 
 return;
 
 }
 
+
 loginBtn.disabled=false;
-loginBtn.innerText="Login to Dashboard";
+
+loginBtn.innerText =
+"Login to Dashboard";
+
 
 showDashboard();
 
 });
 
 
-logoutBtn.addEventListener("click",async()=>{
+// ======================================================
+// LOGOUT
+// ======================================================
+
+logoutBtn.addEventListener(
+"click",
+async()=>{
 
 await supabaseClient.auth.signOut();
 
 email.value="";
+
 password.value="";
 
 showLogin();
@@ -253,11 +775,18 @@ showLogin();
 });
 
 
-mediaFile.addEventListener("change",()=>{
+// ======================================================
+// FILE NAME
+// ======================================================
+
+mediaFile.addEventListener(
+"change",
+()=>{
 
 if(mediaFile.files.length){
 
-fileName.innerText=mediaFile.files[0].name;
+fileName.innerText =
+mediaFile.files[0].name;
 
 }else{
 
@@ -268,55 +797,102 @@ fileName.innerText="";
 });
 
 
-uploadBtn.addEventListener("click",async()=>{
+// ======================================================
+// UPLOAD
+// ======================================================
+
+uploadBtn.addEventListener(
+"click",
+async()=>{
 
 message.innerText="";
+
 message.className="";
 
-const title=titleInput.value.trim();
-const category=categoryInput.value;
-const description=descriptionInput.value.trim();
-const file=mediaFile.files[0];
+
+const title =
+titleInput.value.trim();
+
+const category =
+categoryInput.value;
+
+const description =
+descriptionInput.value.trim();
+
+const file =
+mediaFile.files[0];
+
 
 if(!title){
 
 message.className="error";
-message.innerText="Project title enter karo.";
+
+message.innerText =
+"Project title enter karo.";
+
 return;
 
 }
+
 
 if(!file){
 
 message.className="error";
-message.innerText="Photo ya video select karo.";
+
+message.innerText =
+"Photo ya video select karo.";
+
 return;
 
 }
 
+
 uploadBtn.disabled=true;
-uploadBtn.innerText="Uploading...";
+
+uploadBtn.innerText =
+"Uploading...";
+
 
 try{
 
-const {data:{user}} =
+
+const {
+data:{
+user
+}
+} =
 await supabaseClient.auth.getUser();
+
 
 if(!user){
 
-throw new Error("Admin session expired. Dobara login karo.");
+throw new Error(
+"Admin session expired. Dobara login karo."
+);
 
 }
 
 
 const safeName =
-file.name.replace(/[^a-zA-Z0-9._-]/g,"-");
+file.name.replace(
+/[^a-zA-Z0-9._-]/g,
+"-"
+);
+
 
 const filePath =
-Date.now()+"-"+Math.random().toString(36).substring(2,8)+"-"+safeName;
+Date.now() +
+"-" +
+Math.random()
+.toString(36)
+.substring(2,8) +
+"-" +
+safeName;
 
 
-const {error:uploadError} =
+const {
+error:uploadError
+} =
 await supabaseClient.storage
 .from("STJ-MEDIA")
 .upload(
@@ -330,84 +906,143 @@ upsert:false
 
 
 if(uploadError){
+
 throw uploadError;
+
 }
 
 
-const {data:publicData} =
+const {
+data:publicData
+} =
 supabaseClient.storage
 .from("STJ-MEDIA")
-.getPublicUrl(filePath);
+.getPublicUrl(
+filePath
+);
 
 
-const mediaUrl=publicData.publicUrl;
+const mediaUrl =
+publicData.publicUrl;
+
 
 const mediaType =
 file.type.startsWith("video/")
-?"video"
-:"image";
+?
+"video"
+:
+"image";
 
 
-const {error:dbError} =
+const {
+error:dbError
+} =
 await supabaseClient
 .from("portfolio")
 .insert({
 
 title:title,
+
 category:category,
-description:description || null,
-media_url:mediaUrl,
-media_type:mediaType
+
+description:
+description || null,
+
+media_url:
+mediaUrl,
+
+media_type:
+mediaType,
+
+status:
+"live"
 
 });
 
 
 if(dbError){
+
 throw dbError;
+
 }
 
 
-message.className="success";
-message.innerText="✅ Work successfully published!";
+message.className =
+"success";
+
+message.innerText =
+"✅ Work successfully published!";
+
 
 titleInput.value="";
+
 descriptionInput.value="";
+
 mediaFile.value="";
+
 fileName.innerText="";
+
 
 await loadWorks();
 
 
-}catch(err){
+}
+catch(err){
 
 console.error(err);
 
-message.className="error";
-message.innerText="Upload failed: "+(err.message || "Unknown error");
+message.className =
+"error";
+
+message.innerText =
+"Upload failed: " +
+(err.message ||
+"Unknown error");
 
 }
 
+
 uploadBtn.disabled=false;
-uploadBtn.innerText="Upload & Publish";
+
+uploadBtn.innerText =
+"Upload & Publish";
 
 });
 
 
+// ======================================================
+// LOAD WORKS
+// ======================================================
+
 async function loadWorks(){
 
-workList.innerHTML='<p class="muted">Loading...</p>';
+workList.innerHTML =
+'<p class="muted">Loading...</p>';
 
-const {data,error} =
+
+const {
+data,
+error
+} =
 await supabaseClient
 .from("portfolio")
 .select("*")
-.order("created_at",{ascending:false});
+.order(
+"created_at",
+{
+ascending:false
+}
+);
 
 
 if(error){
 
-workList.innerHTML=
-`<p class="error">${escapeHTML(error.message)}</p>`;
+workList.innerHTML =
+`
+<p class="error">
+${escapeHTML(error.message)}
+</p>
+`;
 
 return;
 
@@ -416,22 +1051,196 @@ return;
 
 if(!data || !data.length){
 
-workList.innerHTML=
-'<p class="muted">Abhi koi work publish nahi hua.</p>';
+workList.innerHTML =
+'<p class="muted">Abhi koi work nahi hai.</p>';
 
 return;
 
 }
 
 
-workList.innerHTML=data.map(item=>{
+// Filter according to tab
+
+const filtered =
+data.filter(item=>{
+
+const status =
+item.status || "live";
+
+return status === currentTab;
+
+});
+
+
+if(!filtered.length){
+
+let text =
+"No work available.";
+
+if(currentTab==="live"){
+text="Live me koi work nahi hai.";
+}
+
+if(currentTab==="archive"){
+text="Archive empty hai.";
+}
+
+if(currentTab==="bin"){
+text="Bin empty hai.";
+}
+
+
+workList.innerHTML =
+`
+<p class="muted">
+${text}
+</p>
+`;
+
+return;
+
+}
+
+
+// Render cards
+
+workList.innerHTML =
+filtered.map(item=>{
+
+const status =
+item.status || "live";
+
 
 const media =
-item.media_type==="video"
+item.media_type === "video"
 
-? `<video class="work-media" src="${escapeHTML(item.media_url)}" controls playsinline></video>`
+?
 
-: `<img class="work-media" src="${escapeHTML(item.media_url)}" alt="${escapeHTML(item.title)}">`;
+`
+<video
+class="work-media"
+src="${escapeHTML(item.media_url)}"
+controls
+playsinline
+></video>
+`
+
+:
+
+`
+<img
+class="work-media"
+src="${escapeHTML(item.media_url)}"
+alt="${escapeHTML(item.title)}"
+>
+`;
+
+
+let badge = "";
+
+if(status==="live"){
+
+badge =
+`
+<span class="live-badge">
+LIVE
+</span>
+`;
+
+}
+
+if(status==="archive"){
+
+badge =
+`
+<span class="archive-badge">
+ARCHIVED
+</span>
+`;
+
+}
+
+if(status==="bin"){
+
+badge =
+`
+<span class="bin-badge">
+BIN
+</span>
+`;
+
+}
+
+
+// Buttons
+
+let buttons = "";
+
+
+if(status==="live"){
+
+buttons =
+`
+<button
+class="action-btn archive-btn"
+onclick="archiveWork('${item.id}')"
+>
+📦 Archive
+</button>
+
+<button
+class="action-btn bin-btn"
+onclick="moveToBin('${item.id}')"
+>
+🗑️ Move to Bin
+</button>
+`;
+
+}
+
+
+if(status==="archive"){
+
+buttons =
+`
+<button
+class="action-btn restore-btn"
+onclick="unarchiveWork('${item.id}')"
+>
+↩️ Unarchive
+</button>
+
+<button
+class="action-btn bin-btn"
+onclick="moveToBin('${item.id}')"
+>
+🗑️ Move to Bin
+</button>
+`;
+
+}
+
+
+if(status==="bin"){
+
+buttons =
+`
+<button
+class="action-btn restore-btn"
+onclick="restoreFromBin('${item.id}')"
+>
+♻️ Restore
+</button>
+
+<button
+class="action-btn delete-btn"
+onclick="deletePermanently('${item.id}')"
+>
+❌ Delete Permanently
+</button>
+`;
+
+}
 
 
 return `
@@ -442,15 +1251,33 @@ ${media}
 
 <div class="work-info">
 
-<small>${escapeHTML(item.category)}</small>
+<small>
+${escapeHTML(item.category || "work")}
+</small>
 
-<h3>${escapeHTML(item.title)}</h3>
+<h3>
+${escapeHTML(item.title)}
+</h3>
 
 ${
 item.description
-? `<p class="muted">${escapeHTML(item.description)}</p>`
-:""
+?
+`
+<p class="muted">
+${escapeHTML(item.description)}
+</p>
+`
+:
+""
 }
+
+${badge}
+
+<div class="actions">
+
+${buttons}
+
+</div>
 
 </div>
 
@@ -463,29 +1290,346 @@ item.description
 }
 
 
-function escapeHTML(value){
+// ======================================================
+// ARCHIVE
+// ======================================================
 
-return String(value)
-.replaceAll("&","&amp;")
-.replaceAll("<","&lt;")
-.replaceAll(">","&gt;")
-.replaceAll('"',"&quot;")
-.replaceAll("'","&#039;");
+async function archiveWork(id){
+
+if(
+!confirm(
+"Is work ko Archive karna hai?"
+)
+){
+
+return;
 
 }
 
+
+await changeStatus(
+id,
+"archive"
+);
+
+}
+
+
+// ======================================================
+// UNARCHIVE
+// ======================================================
+
+async function unarchiveWork(id){
+
+await changeStatus(
+id,
+"live"
+);
+
+}
+
+
+// ======================================================
+// MOVE TO BIN
+// ======================================================
+
+async function moveToBin(id){
+
+if(
+!confirm(
+"Is work ko Bin me move karna hai?"
+)
+){
+
+return;
+
+}
+
+
+await changeStatus(
+id,
+"bin"
+);
+
+}
+
+
+// ======================================================
+// RESTORE FROM BIN
+// ======================================================
+
+async function restoreFromBin(id){
+
+await changeStatus(
+id,
+"live"
+);
+
+}
+
+
+// ======================================================
+// CHANGE STATUS
+// ======================================================
+
+async function changeStatus(
+id,
+status
+){
+
+const {
+error
+} =
+await supabaseClient
+.from("portfolio")
+.update({
+status:status
+})
+.eq("id",id);
+
+
+if(error){
+
+alert(
+"Status update failed: " +
+error.message
+);
+
+return;
+
+}
+
+
+await loadWorks();
+
+}
+
+
+// ======================================================
+// GET STORAGE PATH
+// ======================================================
+
+function getStoragePath(mediaUrl){
+
+try{
+
+const url =
+new URL(mediaUrl);
+
+
+const marker =
+"/STJ-MEDIA/";
+
+
+const index =
+url.pathname.indexOf(marker);
+
+
+if(index === -1){
+
+return null;
+
+}
+
+
+return decodeURIComponent(
+url.pathname.substring(
+index + marker.length
+)
+);
+
+}
+catch(error){
+
+console.error(
+"Storage path error:",
+error
+);
+
+return null;
+
+}
+
+}
+
+
+// ======================================================
+// PERMANENT DELETE
+// ======================================================
+
+async function deletePermanently(id){
+
+const confirmed =
+confirm(
+"⚠️ Ye work permanently delete ho jayega.\n\nDatabase aur Storage dono se remove hoga.\n\nContinue?"
+);
+
+
+if(!confirmed){
+
+return;
+
+}
+
+
+const {
+data:item,
+error:fetchError
+} =
+await supabaseClient
+.from("portfolio")
+.select("*")
+.eq("id",id)
+.single();
+
+
+if(fetchError){
+
+alert(
+"Work fetch nahi ho saka: " +
+fetchError.message
+);
+
+return;
+
+}
+
+
+const storagePath =
+getStoragePath(
+item.media_url
+);
+
+
+if(storagePath){
+
+const {
+error:storageError
+} =
+await supabaseClient.storage
+.from("STJ-MEDIA")
+.remove([
+storagePath
+]);
+
+
+if(storageError){
+
+alert(
+"Photo/video Storage se delete nahi hua:\n" +
+storageError.message
+);
+
+return;
+
+}
+
+}
+
+
+// Delete database row
+
+const {
+error:deleteError
+} =
+await supabaseClient
+.from("portfolio")
+.delete()
+.eq("id",id);
+
+
+if(deleteError){
+
+alert(
+"Database se delete nahi hua:\n" +
+deleteError.message
+);
+
+return;
+
+}
+
+
+alert(
+"✅ Work permanently deleted."
+);
+
+
+await loadWorks();
+
+}
+
+
+// ======================================================
+// TABS
+// ======================================================
+
+tabs.forEach(tab=>{
+
+tab.addEventListener(
+"click",
+()=>{
+
+tabs.forEach(t=>{
+t.classList.remove("active");
+});
+
+
+tab.classList.add("active");
+
+
+currentTab =
+tab.getAttribute(
+"data-tab"
+) || "live";
+
+
+loadWorks();
+
+});
+
+});
+
+
+// ======================================================
+// ESCAPE HTML
+// ======================================================
+
+function escapeHTML(value){
+
+return String(value ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+// ======================================================
+// AUTH STATE
+// ======================================================
 
 supabaseClient.auth.onAuthStateChange(
 (event,session)=>{
 
 if(session){
+
 showDashboard();
+
 }else{
+
 showLogin();
+
 }
 
 });
 
+
+// ======================================================
+// START
+// ======================================================
 
 checkUser();
 
