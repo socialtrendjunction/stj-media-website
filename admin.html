@@ -1,69 +1,46 @@
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+const SUPABASE_URL = "https://acuszwigwpfrumkhtdeh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
 
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-  const loginButton = [...document.querySelectorAll("button")]
-    .find(b => b.textContent.trim() === "Login to Dashboard");
+const loginForm = document.querySelector("form");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
 
-  if (!email || !password || !loginButton) {
-    console.error("STJ Login elements not found");
+loginForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!email || !password) {
+    alert("Please enter email and password.");
     return;
   }
 
-  loginButton.onclick = async function (event) {
+  try {
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
 
-    event.preventDefault();
-
-    const emailValue = email.value.trim();
-    const passwordValue = password.value;
-
-    if (!emailValue || !passwordValue) {
-      alert("Email aur password enter karo.");
+    if (error) {
+      alert(error.message);
       return;
     }
 
-    loginButton.disabled = true;
-    loginButton.textContent = "Logging in...";
-
-    try {
-
-      const { data, error } =
-        await supabaseClient.auth.signInWithPassword({
-          email: emailValue,
-          password: passwordValue
-        });
-
-      if (error) {
-        alert("Login failed:\n" + error.message);
-        return;
-      }
-
-      if (data.session) {
-
-        // Existing admin code ko session mil jayega
-        location.reload();
-
-      } else {
-
-        alert("Login session nahi mili.");
-
-      }
-
-    } catch (error) {
-
-      console.error(error);
-      alert("Login error:\n" + error.message);
-
-    } finally {
-
-      loginButton.disabled = false;
-      loginButton.textContent = "Login to Dashboard";
-
+    if (data.session) {
+      location.reload();
     }
 
-  };
-
+  } catch (error) {
+    console.error(error);
+    alert("Login failed.");
+  }
 });
 </script>
