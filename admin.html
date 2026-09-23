@@ -7,208 +7,40 @@
 
 <style>
 *{box-sizing:border-box}
-
-body{
-  margin:0;
-  min-height:100vh;
-  background:#0b0b0b;
-  color:#fff;
-  font-family:Arial,sans-serif;
-}
-
-.wrap{
-  width:100%;
-  max-width:1100px;
-  margin:auto;
-  padding:25px;
-}
-
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:15px 0 30px;
-  border-bottom:1px solid #292929;
-}
-
-header a{
-  color:#fff;
-  text-decoration:none;
-  font-weight:bold;
-}
-
-header span{
-  color:#777;
-  font-size:12px;
-  letter-spacing:2px;
-}
-
-.card{
-  background:#151515;
-  border:1px solid #292929;
-  border-radius:20px;
-  padding:30px;
-  margin-top:25px;
-}
-
-.login-card{
-  max-width:430px;
-  margin:80px auto 0;
-  text-align:center;
-}
-
-.logo{
-  width:80px;
-  height:80px;
-  object-fit:contain;
-}
-
-.eyebrow{
-  color:#888;
-  font-size:12px;
-  letter-spacing:2px;
-}
-
-h1{
-  font-size:36px;
-  margin:10px 0;
-}
-
-h2{
-  margin-top:0;
-}
-
-.muted{
-  color:#888;
-  line-height:1.6;
-}
-
-input,select,textarea{
-  width:100%;
-  padding:15px;
-  margin:8px 0;
-  border-radius:10px;
-  border:1px solid #333;
-  background:#0d0d0d;
-  color:#fff;
-  font-size:15px;
-}
-
-textarea{
-  min-height:100px;
-  resize:vertical;
-}
-
-button{
-  width:100%;
-  padding:15px;
-  margin-top:10px;
-  border:0;
-  border-radius:10px;
-  background:#fff;
-  color:#000;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-button:hover{
-  opacity:.85;
-}
-
-button:disabled{
-  opacity:.5;
-  cursor:not-allowed;
-}
-
-.hidden{
-  display:none!important;
-}
-
-#error{
-  color:#ff7070;
-  margin-top:15px;
-}
-
-#message{
-  margin-top:15px;
-  line-height:1.5;
-}
-
-.success{
-  color:#6cff9b;
-}
-
-.error{
-  color:#ff7070;
-}
-
-.dashboard-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:20px;
-}
-
-.logout{
-  width:auto;
-  padding:12px 20px;
-  background:transparent;
-  color:#fff;
-  border:1px solid #444;
-}
-
-.work-list{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:18px;
-  margin-top:20px;
-}
-
-.work{
-  background:#0d0d0d;
-  border:1px solid #292929;
-  border-radius:14px;
-  overflow:hidden;
-}
-
-.work-media{
-  width:100%;
-  aspect-ratio:4/3;
-  object-fit:cover;
-  display:block;
-  background:#111;
-}
-
-.work-info{
-  padding:15px;
-}
-
-.work-info h3{
-  margin:0 0 6px;
-}
-
-.work-info small{
-  color:#888;
-  text-transform:uppercase;
-}
-
-.delete-btn{
-  background:#191919;
-  color:#ff7070;
-  border:1px solid #333;
-}
-
-.file-name{
-  color:#888;
-  font-size:13px;
-  margin-top:5px;
-}
-
+body{margin:0;min-height:100vh;background:#0b0b0b;color:#fff;font-family:Arial,sans-serif}
+.wrap{width:100%;max-width:1100px;margin:auto;padding:25px}
+header{display:flex;justify-content:space-between;align-items:center;padding:15px 0 30px;border-bottom:1px solid #292929}
+header a{color:#fff;text-decoration:none;font-weight:bold}
+header span{color:#777;font-size:12px;letter-spacing:2px}
+.card{background:#151515;border:1px solid #292929;border-radius:20px;padding:30px;margin-top:25px}
+.login-card{max-width:430px;margin:80px auto 0;text-align:center}
+.logo{width:80px;height:80px;object-fit:contain}
+.eyebrow{color:#888;font-size:12px;letter-spacing:2px}
+h1{font-size:36px;margin:10px 0}
+h2{margin-top:0}
+.muted{color:#888;line-height:1.6}
+input,select,textarea{width:100%;padding:15px;margin:8px 0;border-radius:10px;border:1px solid #333;background:#0d0d0d;color:#fff;font-size:15px}
+textarea{min-height:100px;resize:vertical}
+button{width:100%;padding:15px;margin-top:10px;border:0;border-radius:10px;background:#fff;color:#000;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
+.hidden{display:none!important}
+#error{color:#ff7070;margin-top:15px}
+.success{color:#6cff9b;margin-top:15px}
+.error{color:#ff7070;margin-top:15px}
+.dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.logout{width:auto;padding:12px 20px;background:transparent;color:#fff;border:1px solid #444}
+.work-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:20px}
+.work{background:#0d0d0d;border:1px solid #292929;border-radius:14px;overflow:hidden}
+.work-media{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#111}
+.work-info{padding:15px}
+.work-info h3{margin:6px 0}
+.work-info small{color:#888;text-transform:uppercase}
+.file-name{color:#888;font-size:13px;margin-top:5px}
 @media(max-width:600px){
-  .wrap{padding:15px}
-  .card{padding:22px}
-  h1{font-size:30px}
-  .dashboard-head{align-items:flex-start}
+.wrap{padding:15px}
+.card{padding:22px}
+h1{font-size:30px}
+.dashboard-head{align-items:flex-start}
 }
 </style>
 </head>
@@ -218,118 +50,85 @@ button:disabled{
 <div class="wrap">
 
 <header>
-  <a href="index.html">← STJ Media</a>
-  <span>ADMIN PANEL</span>
+<a href="index.html">← STJ Media</a>
+<span>ADMIN PANEL</span>
 </header>
 
-<!-- LOGIN -->
 <section id="loginBox" class="card login-card">
 
-  <img src="stj-logo.png" class="logo" alt="STJ Media">
+<img src="stj-logo.png" class="logo" alt="STJ Media">
 
-  <p class="eyebrow">STJ MEDIA · PRIVATE AREA</p>
+<p class="eyebrow">STJ MEDIA · PRIVATE AREA</p>
 
-  <h1>Admin Login</h1>
+<h1>Admin Login</h1>
 
-  <p class="muted">
-    Login with your STJ Media admin account.
-  </p>
+<p class="muted">Login with your STJ Media admin account.</p>
 
-  <input
-    id="email"
-    type="email"
-    placeholder="Admin email"
-    autocomplete="email"
-  >
+<input id="email" type="email" placeholder="Admin email">
 
-  <input
-    id="password"
-    type="password"
-    placeholder="Password"
-    autocomplete="current-password"
-  >
+<input id="password" type="password" placeholder="Password">
 
-  <button id="loginBtn">Login to Dashboard</button>
+<button id="loginBtn">Login to Dashboard</button>
 
-  <p id="error"></p>
+<p id="error"></p>
 
 </section>
 
 
-<!-- DASHBOARD -->
 <section id="dashboard" class="hidden">
 
-  <div class="dashboard-head">
+<div class="dashboard-head">
 
-    <div>
-      <p class="eyebrow">STJ MEDIA</p>
-      <h1>Admin Dashboard</h1>
-      <p class="muted">
-        Upload and manage your portfolio.
-      </p>
-    </div>
+<div>
+<p class="eyebrow">STJ MEDIA</p>
+<h1>Admin Dashboard</h1>
+<p class="muted">Upload and manage your portfolio.</p>
+</div>
 
-    <button id="logoutBtn" class="logout">
-      Logout
-    </button>
+<button id="logoutBtn" class="logout">Logout</button>
 
-  </div>
+</div>
 
 
-  <!-- ADD WORK -->
-  <div class="card">
+<div class="card">
 
-    <h2>Add New Work</h2>
+<h2>Add New Work</h2>
 
-    <p class="muted">
-      Upload a photo or video and publish it to your portfolio.
-    </p>
+<p class="muted">
+Upload a photo or video and publish it to your portfolio.
+</p>
 
-    <input
-      id="title"
-      type="text"
-      placeholder="Project title"
-    >
+<input id="title" type="text" placeholder="Project title">
 
-    <select id="category">
-      <option value="design">Graphic Design</option>
-      <option value="shoot">Photo & Video</option>
-      <option value="edit">Video Editing</option>
-      <option value="social">Social Media</option>
-    </select>
+<select id="category">
+<option value="design">Graphic Design</option>
+<option value="shoot">Photo & Video</option>
+<option value="edit">Video Editing</option>
+<option value="social">Social Media</option>
+</select>
 
-    <textarea
-      id="description"
-      placeholder="Short description (optional)"
-    ></textarea>
+<textarea id="description" placeholder="Short description (optional)"></textarea>
 
-    <input
-      id="mediaFile"
-      type="file"
-      accept="image/*,video/*"
-    >
+<input id="mediaFile" type="file" accept="image/*,video/*">
 
-    <div id="fileName" class="file-name"></div>
+<div id="fileName" class="file-name"></div>
 
-    <button id="uploadBtn">
-      Upload & Publish
-    </button>
+<button id="uploadBtn">Upload & Publish</button>
 
-    <div id="message"></div>
+<div id="message"></div>
 
-  </div>
+</div>
 
 
-  <!-- EXISTING WORK -->
-  <div class="card">
+<div class="card">
 
-    <h2>Published Work</h2>
+<h2>Published Work</h2>
 
-    <div id="workList" class="work-list">
-      <p class="muted">Loading...</p>
-    </div>
+<div id="workList" class="work-list">
+<p class="muted">Loading...</p>
+</div>
 
-  </div>
+</div>
 
 </section>
 
@@ -341,494 +140,351 @@ button:disabled{
 <script>
 
 const SUPABASE_URL =
-  "https://acuszwigwpfrumkhtdeh.supabase.co";
+"https://acuszwigwpfrumkhtdeh.supabase.co";
 
 const SUPABASE_KEY =
-  "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
+"sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
 
 const supabaseClient =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 
-const loginBox =
-  document.getElementById("loginBox");
+const loginBox=document.getElementById("loginBox");
+const dashboard=document.getElementById("dashboard");
+const email=document.getElementById("email");
+const password=document.getElementById("password");
+const loginBtn=document.getElementById("loginBtn");
+const logoutBtn=document.getElementById("logoutBtn");
+const errorBox=document.getElementById("error");
 
-const dashboard =
-  document.getElementById("dashboard");
-
-const email =
-  document.getElementById("email");
-
-const password =
-  document.getElementById("password");
-
-const loginBtn =
-  document.getElementById("loginBtn");
-
-const logoutBtn =
-  document.getElementById("logoutBtn");
-
-const errorBox =
-  document.getElementById("error");
-
-const titleInput =
-  document.getElementById("title");
-
-const categoryInput =
-  document.getElementById("category");
-
-const descriptionInput =
-  document.getElementById("description");
-
-const mediaFile =
-  document.getElementById("mediaFile");
-
-const uploadBtn =
-  document.getElementById("uploadBtn");
-
-const message =
-  document.getElementById("message");
-
-const workList =
-  document.getElementById("workList");
-
-const fileName =
-  document.getElementById("fileName");
+const titleInput=document.getElementById("title");
+const categoryInput=document.getElementById("category");
+const descriptionInput=document.getElementById("description");
+const mediaFile=document.getElementById("mediaFile");
+const uploadBtn=document.getElementById("uploadBtn");
+const message=document.getElementById("message");
+const workList=document.getElementById("workList");
+const fileName=document.getElementById("fileName");
 
 
 function showDashboard(){
 
-  loginBox.classList.add("hidden");
-  dashboard.classList.remove("hidden");
+loginBox.classList.add("hidden");
+dashboard.classList.remove("hidden");
 
-  loadWorks();
+loadWorks();
+
 }
 
 
 function showLogin(){
 
-  loginBox.classList.remove("hidden");
-  dashboard.classList.add("hidden");
+loginBox.classList.remove("hidden");
+dashboard.classList.add("hidden");
+
 }
 
 
 async function checkUser(){
 
-  const {
-    data:{
-      session
-    }
-  } =
-  await supabaseClient.auth.getSession();
+const {data:{session}} =
+await supabaseClient.auth.getSession();
 
-  if(session){
-    showDashboard();
-  }else{
-    showLogin();
-  }
+if(session){
+showDashboard();
+}else{
+showLogin();
+}
+
 }
 
 
-loginBtn.addEventListener(
-  "click",
-  async function(){
+loginBtn.addEventListener("click",async()=>{
 
-    errorBox.innerText = "";
+errorBox.innerText="";
 
-    const userEmail =
-      email.value.trim();
+if(!email.value.trim() || !password.value){
 
-    const userPassword =
-      password.value;
+errorBox.innerText="Email aur password enter karo.";
+return;
 
-    if(!userEmail || !userPassword){
+}
 
-      errorBox.innerText =
-        "Email aur password enter karo.";
+loginBtn.disabled=true;
+loginBtn.innerText="Logging in...";
 
-      return;
-    }
+const {error:loginError} =
+await supabaseClient.auth.signInWithPassword({
 
-    loginBtn.disabled = true;
-    loginBtn.innerText = "Logging in...";
+email:email.value.trim(),
+password:password.value
 
-    const {
-      error:loginError
-    } =
-    await supabaseClient.auth.signInWithPassword({
-
-      email:userEmail,
-      password:userPassword
-
-    });
+});
 
 
-    if(loginError){
+if(loginError){
 
-      errorBox.innerText =
-        loginError.message;
+errorBox.innerText=loginError.message;
 
-      loginBtn.disabled = false;
-      loginBtn.innerText =
-        "Login to Dashboard";
+loginBtn.disabled=false;
+loginBtn.innerText="Login to Dashboard";
 
-      return;
-    }
+return;
 
-    loginBtn.disabled = false;
-    loginBtn.innerText =
-      "Login to Dashboard";
+}
 
-    showDashboard();
+loginBtn.disabled=false;
+loginBtn.innerText="Login to Dashboard";
 
-  }
+showDashboard();
+
+});
+
+
+logoutBtn.addEventListener("click",async()=>{
+
+await supabaseClient.auth.signOut();
+
+email.value="";
+password.value="";
+
+showLogin();
+
+});
+
+
+mediaFile.addEventListener("change",()=>{
+
+if(mediaFile.files.length){
+
+fileName.innerText=mediaFile.files[0].name;
+
+}else{
+
+fileName.innerText="";
+
+}
+
+});
+
+
+uploadBtn.addEventListener("click",async()=>{
+
+message.innerText="";
+message.className="";
+
+const title=titleInput.value.trim();
+const category=categoryInput.value;
+const description=descriptionInput.value.trim();
+const file=mediaFile.files[0];
+
+if(!title){
+
+message.className="error";
+message.innerText="Project title enter karo.";
+return;
+
+}
+
+if(!file){
+
+message.className="error";
+message.innerText="Photo ya video select karo.";
+return;
+
+}
+
+uploadBtn.disabled=true;
+uploadBtn.innerText="Uploading...";
+
+try{
+
+const {data:{user}} =
+await supabaseClient.auth.getUser();
+
+if(!user){
+
+throw new Error("Admin session expired. Dobara login karo.");
+
+}
+
+
+const safeName =
+file.name.replace(/[^a-zA-Z0-9._-]/g,"-");
+
+const filePath =
+Date.now()+"-"+Math.random().toString(36).substring(2,8)+"-"+safeName;
+
+
+const {error:uploadError} =
+await supabaseClient.storage
+.from("STJ-MEDIA")
+.upload(
+filePath,
+file,
+{
+cacheControl:"3600",
+upsert:false
+}
 );
 
 
-logoutBtn.addEventListener(
-  "click",
-  async function(){
+if(uploadError){
+throw uploadError;
+}
 
-    await supabaseClient.auth.signOut();
 
-    email.value = "";
-    password.value = "";
+const {data:publicData} =
+supabaseClient.storage
+.from("STJ-MEDIA")
+.getPublicUrl(filePath);
 
-    showLogin();
 
-  }
-);
+const mediaUrl=publicData.publicUrl;
 
+const mediaType =
+file.type.startsWith("video/")
+?"video"
+:"image";
 
-mediaFile.addEventListener(
-  "change",
-  function(){
 
-    if(mediaFile.files.length){
+const {error:dbError} =
+await supabaseClient
+.from("portfolio")
+.insert({
 
-      fileName.innerText =
-        mediaFile.files[0].name;
+title:title,
+category:category,
+description:description || null,
+media_url:mediaUrl,
+media_type:mediaType
 
-    }else{
+});
 
-      fileName.innerText = "";
 
-    }
+if(dbError){
+throw dbError;
+}
 
-  }
-);
 
+message.className="success";
+message.innerText="✅ Work successfully published!";
 
-uploadBtn.addEventListener(
-  "click",
-  async function(){
+titleInput.value="";
+descriptionInput.value="";
+mediaFile.value="";
+fileName.innerText="";
 
-    message.innerText = "";
-    message.className = "";
+await loadWorks();
 
-    const title =
-      titleInput.value.trim();
 
-    const category =
-      categoryInput.value;
+}catch(err){
 
-    const description =
-      descriptionInput.value.trim();
+console.error(err);
 
-    const file =
-      mediaFile.files[0];
+message.className="error";
+message.innerText="Upload failed: "+(err.message || "Unknown error");
 
+}
 
-    if(!title){
+uploadBtn.disabled=false;
+uploadBtn.innerText="Upload & Publish";
 
-      message.className = "error";
-      message.innerText =
-        "Project title enter karo.";
-
-      return;
-    }
-
-
-    if(!file){
-
-      message.className = "error";
-      message.innerText =
-        "Photo ya video select karo.";
-
-      return;
-    }
-
-
-    uploadBtn.disabled = true;
-    uploadBtn.innerText =
-      "Uploading...";
-
-
-    try{
-
-      const {
-        data:{
-          user
-        }
-      } =
-      await supabaseClient.auth.getUser();
-
-
-      if(!user){
-
-        throw new Error(
-          "Admin session expired. Dobara login karo."
-        );
-
-      }
-
-
-      const extension =
-        file.name.includes(".")
-        ? file.name.split(".").pop()
-        : "file";
-
-
-      const safeName =
-        file.name
-          .replace(/[^a-zA-Z0-9._-]/g,"-");
-
-
-      const filePath =
-        Date.now() +
-        "-" +
-        Math.random()
-          .toString(36)
-          .substring(2,8) +
-        "-" +
-        safeName;
-
-
-      const {
-        error:uploadError
-      } =
-      await supabaseClient.storage
-        .from("stj-media")
-        .upload(
-          filePath,
-          file,
-          {
-            cacheControl:"3600",
-            upsert:false
-          }
-        );
-
-
-      if(uploadError){
-
-        throw uploadError;
-
-      }
-
-
-      const {
-        data:publicData
-      } =
-      supabaseClient.storage
-        .from("stj-media")
-        .getPublicUrl(filePath);
-
-
-      const mediaUrl =
-        publicData.publicUrl;
-
-
-      const mediaType =
-        file.type.startsWith("video/")
-        ? "video"
-        : "image";
-
-
-      const {
-        error:dbError
-      } =
-      await supabaseClient
-        .from("portfolio")
-        .insert({
-
-          title:title,
-          category:category,
-          description:description || null,
-          media_url:mediaUrl,
-          media_type:mediaType
-
-        });
-
-
-      if(dbError){
-
-        throw dbError;
-
-      }
-
-
-      message.className = "success";
-      message.innerText =
-        "✅ Work successfully published!";
-
-
-      titleInput.value = "";
-      descriptionInput.value = "";
-      mediaFile.value = "";
-      fileName.innerText = "";
-
-
-      await loadWorks();
-
-
-    }catch(err){
-
-      console.error(err);
-
-      message.className = "error";
-
-      message.innerText =
-        "Upload failed: " +
-        (err.message || "Unknown error");
-
-    }
-
-
-    uploadBtn.disabled = false;
-    uploadBtn.innerText =
-      "Upload & Publish";
-
-  }
-);
+});
 
 
 async function loadWorks(){
 
-  workList.innerHTML =
-    '<p class="muted">Loading...</p>';
+workList.innerHTML='<p class="muted">Loading...</p>';
+
+const {data,error} =
+await supabaseClient
+.from("portfolio")
+.select("*")
+.order("created_at",{ascending:false});
 
 
-  const {
-    data,
-    error
-  } =
-  await supabaseClient
-    .from("portfolio")
-    .select("*")
-    .order(
-      "created_at",
-      {ascending:false}
-    );
+if(error){
+
+workList.innerHTML=
+`<p class="error">${escapeHTML(error.message)}</p>`;
+
+return;
+
+}
 
 
-  if(error){
+if(!data || !data.length){
 
-    workList.innerHTML =
-      `<p class="error">
-        ${escapeHTML(error.message)}
-      </p>`;
+workList.innerHTML=
+'<p class="muted">Abhi koi work publish nahi hua.</p>';
 
-    return;
-  }
+return;
 
-
-  if(!data || !data.length){
-
-    workList.innerHTML =
-      `<p class="muted">
-        Abhi koi work publish nahi hua.
-      </p>`;
-
-    return;
-  }
+}
 
 
-  workList.innerHTML =
-    data.map(item => {
+workList.innerHTML=data.map(item=>{
 
-      const media =
-        item.media_type === "video"
+const media =
+item.media_type==="video"
 
-        ? `
-          <video
-            class="work-media"
-            src="${escapeHTML(item.media_url)}"
-            controls
-            playsinline>
-          </video>
-        `
+? `<video class="work-media" src="${escapeHTML(item.media_url)}" controls playsinline></video>`
 
-        : `
-          <img
-            class="work-media"
-            src="${escapeHTML(item.media_url)}"
-            alt="${escapeHTML(item.title)}">
-        `;
+: `<img class="work-media" src="${escapeHTML(item.media_url)}" alt="${escapeHTML(item.title)}">`;
 
 
-      return `
-        <div class="work">
+return `
 
-          ${media}
+<div class="work">
 
-          <div class="work-info">
+${media}
 
-            <small>
-              ${escapeHTML(item.category)}
-            </small>
+<div class="work-info">
 
-            <h3>
-              ${escapeHTML(item.title)}
-            </h3>
+<small>${escapeHTML(item.category)}</small>
 
-            ${
-              item.description
-              ? `<p class="muted">
-                   ${escapeHTML(item.description)}
-                 </p>`
-              : ""
-            }
+<h3>${escapeHTML(item.title)}</h3>
 
-          </div>
+${
+item.description
+? `<p class="muted">${escapeHTML(item.description)}</p>`
+:""
+}
 
-        </div>
-      `;
+</div>
 
-    }).join("");
+</div>
+
+`;
+
+}).join("");
 
 }
 
 
 function escapeHTML(value){
 
-  return String(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+return String(value)
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;")
+.replaceAll('"',"&quot;")
+.replaceAll("'","&#039;");
 
 }
 
 
 supabaseClient.auth.onAuthStateChange(
-  function(event,session){
+(event,session)=>{
 
-    if(session){
+if(session){
+showDashboard();
+}else{
+showLogin();
+}
 
-      showDashboard();
-
-    }else{
-
-      showLogin();
-
-    }
-
-  }
-);
+});
 
 
 checkUser();
