@@ -1,46 +1,9 @@
-<script>
-const SUPABASE_URL = "https://acuszwigwpfrumkhtdeh.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-const loginForm = document.querySelector("form");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-
-loginForm.addEventListener("submit", async function (e) {
-  e.preventDefault();
-
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
-
-  if (!email || !password) {
-    alert("Please enter email and password.");
-    return;
-  }
-
-  try {
-    const { data, error } =
-      await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    if (data.session) {
-      location.reload();
-    }
-
-  } catch (error) {
-    console.error(error);
-    alert("Login failed.");
-  }
-});
-</script>
+export const firebaseConfig = {
+  apiKey: "AIzaSyDfbd1PWzD92-bj-B4I-dkm0FnqYXu1h4g",
+  authDomain: "stj-media.firebaseapp.com",
+  projectId: "stj-media",
+  storageBucket: "stj-media.firebasestorage.app",
+  messagingSenderId: "35385801417",
+  appId: "1:35385801417:web:1422af6e45da9bff3d6b18",
+  measurementId: "G-PMKM7T97YJ"
+};
