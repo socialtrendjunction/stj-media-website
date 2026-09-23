@@ -1,26 +1,93 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>STJ Media — Admin</title><link rel="stylesheet" href="admin.css"></head>
-<body>
-<div class="wrap">
-<header><a href="index.html">← STJ Media</a><span>ADMIN PANEL</span></header>
-<section id="login" class="card">
-  <img src="stj-logo.png" alt="STJ">
-  <p class="eyebrow">STJ MEDIA · PRIVATE AREA</p><h1>Admin Login</h1><p class="muted">Manage your portfolio from this device.</p>
-  <form id="loginForm"><input id="user" autocomplete="username" placeholder="Username" required><input id="pass" type="password" autocomplete="current-password" placeholder="Password" required><button>Login</button><p id="loginMsg"></p></form>
-</section>
-<section id="dashboard" class="hidden">
-  <div class="dash-head"><div><p class="eyebrow">STJ MEDIA</p><h1>Content Dashboard</h1></div><button id="logout" class="outline">Logout</button></div>
-  <div class="card">
-   <h2>Add New Work</h2><p class="muted">This version stores portfolio items in this browser. For public cross-device uploads, connect Supabase/GitHub storage as the next step.</p>
-   <form id="workForm" class="grid">
-    <input id="title" placeholder="Project name" required>
-    <select id="category"><option value="design">Graphic Design</option><option value="shoot">Photo & Video</option><option value="edit">Video Editing</option></select>
-    <input id="media" type="file" accept="image/*,video/*" required>
-    <button>Add to Portfolio</button>
-   </form>
-  </div>
-  <div class="card"><h2>Saved Work</h2><div id="saved"></div></div>
-</section>
-</div>
-<script src="admin.js"></script>
-</body></html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>STJ Media — Admin</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:#0b0b0b;
+  color:#fff;
+  font-family:Arial, sans-serif;
+}
+
+.wrap{
+  width:100%;
+  max-width:1100px;
+  margin:auto;
+  padding:25px;
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 0 30px;
+  border-bottom:1px solid #292929;
+}
+
+header a{
+  color:#fff;
+  text-decoration:none;
+  font-weight:bold;
+}
+
+header span{
+  color:#777;
+  font-size:12px;
+  letter-spacing:2px;
+}
+
+.card{
+  background:#151515;
+  border:1px solid #292929;
+  border-radius:20px;
+  padding:30px;
+  margin-top:25px;
+}
+
+.login-card{
+  max-width:430px;
+  margin:80px auto 0;
+  text-align:center;
+}
+
+.logo{
+  width:80px;
+  height:80px;
+  object-fit:contain;
+  margin-bottom:15px;
+}
+
+.eyebrow{
+  color:#888;
+  font-size:12px;
+  letter-spacing:2px;
+}
+
+h1{
+  font-size:36px;
+  margin:10px 0;
+}
+
+h2{
+  margin-top:0;
+}
+
+.muted{
+  color:#888;
+  line-height:1.6;
+}
+
+input,
+select{
+  width:100%;
+  padding:15px
