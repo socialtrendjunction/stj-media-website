@@ -1,33 +1,59 @@
+// ======================================================
 // STJ MEDIA — PUBLIC WEBSITE SCRIPT
+// ======================================================
 
-const SUPABASE_URL = "https://acuszwigwpfrumkhtdeh.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
+const SUPABASE_URL =
+  "https://acuszwigwpfrumkhtdeh.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
+
+
+// ======================================================
+// ELEMENTS
+// ======================================================
 
 const portfolio = document.getElementById("portfolio");
 const filters = document.querySelectorAll(".filter");
 
 
-// ==========================
+// ======================================================
 // MOBILE MENU
-// ==========================
+// ======================================================
 
 const menu = document.querySelector(".menu");
 const nav = document.querySelector(".nav nav");
 
 if (menu && nav) {
+
   menu.addEventListener("click", () => {
     nav.classList.toggle("open");
   });
+
 }
 
 
-// ==========================
+// ======================================================
 // SCROLL REVEAL
-// ==========================
+// ======================================================
 
-const revealItems = document.querySelectorAll(".reveal");
+function startReveal() {
 
-if ("IntersectionObserver" in window) {
+  const items = document.querySelectorAll(".reveal");
+
+  if (!items.length) return;
+
+
+  // Show items normally if browser doesn't support observer
+  if (!("IntersectionObserver" in window)) {
+
+    items.forEach(item => {
+      item.classList.add("show");
+    });
+
+    return;
+  }
+
 
   const observer = new IntersectionObserver(
     entries => {
@@ -35,7 +61,11 @@ if ("IntersectionObserver" in window) {
       entries.forEach(entry => {
 
         if (entry.isIntersecting) {
+
           entry.target.classList.add("show");
+
+          observer.unobserve(entry.target);
+
         }
 
       });
@@ -46,24 +76,25 @@ if ("IntersectionObserver" in window) {
     }
   );
 
-  revealItems.forEach(item => observer.observe(item));
 
-} else {
-
-  revealItems.forEach(item => {
-    item.classList.add("show");
+  items.forEach(item => {
+    observer.observe(item);
   });
 
 }
 
 
-// ==========================
-// HTML ESCAPE
-// ==========================
+// Start reveal immediately
+startReveal();
+
+
+// ======================================================
+// HTML SECURITY
+// ======================================================
 
 function escapeHTML(value) {
 
-  return String(value || "")
+  return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -73,17 +104,23 @@ function escapeHTML(value) {
 }
 
 
-// ==========================
-// LOAD PORTFOLIO
-// ==========================
+// ======================================================
+// PORTFOLIO LOADING
+// ======================================================
 
 async function loadPortfolio(category = "all") {
 
   if (!portfolio) {
-    console.error("Portfolio container not found.");
+
+    console.error(
+      "STJ MEDIA: #portfolio element not found."
+    );
+
     return;
   }
 
+
+  // Loading message
   portfolio.innerHTML = `
     <div style="
       grid-column:1/-1;
@@ -95,7 +132,12 @@ async function loadPortfolio(category = "all") {
     </div>
   `;
 
+
   try {
+
+    // --------------------------------------------------
+    // SUPABASE REST REQUEST
+    // --------------------------------------------------
 
     const url =
       SUPABASE_URL +
@@ -103,56 +145,96 @@ async function loadPortfolio(category = "all") {
       "?select=id,title,category,description,media_url,media_type,created_at" +
       "&order=created_at.desc";
 
+
     const response = await fetch(url, {
+
       method: "GET",
+
       headers: {
+
         "apikey": SUPABASE_KEY,
-        "Authorization": "Bearer " + SUPABASE_KEY
+
+        "Authorization":
+          "Bearer " + SUPABASE_KEY,
+
+        "Content-Type":
+          "application/json"
+
       }
+
     });
 
 
+    // --------------------------------------------------
+    // ERROR CHECK
+    // --------------------------------------------------
+
     if (!response.ok) {
 
-      const errorText = await response.text();
+      const errorText =
+        await response.text();
 
       console.error(
-        "Supabase portfolio error:",
+        "STJ MEDIA SUPABASE ERROR:",
         response.status,
         errorText
       );
 
-      throw new Error("Portfolio could not be loaded.");
+      throw new Error(
+        "Portfolio request failed."
+      );
 
     }
 
 
-    let data = await response.json();
+    // --------------------------------------------------
+    // GET DATA
+    // --------------------------------------------------
 
-    console.log("STJ MEDIA PORTFOLIO:", data);
+    let works =
+      await response.json();
 
 
-    // ==========================
+    console.log(
+      "STJ MEDIA — Portfolio:",
+      works
+    );
+
+
+    // Make sure data is an array
+    if (!Array.isArray(works)) {
+
+      works = [];
+
+    }
+
+
+    // --------------------------------------------------
     // CATEGORY FILTER
-    // ==========================
+    // --------------------------------------------------
 
     if (category !== "all") {
 
-      data = data.filter(item => {
+      const selectedCategory =
+        String(category).toLowerCase();
 
-        return String(item.category || "").toLowerCase() ===
-          String(category || "").toLowerCase();
+
+      works = works.filter(item => {
+
+        return String(
+          item.category || ""
+        ).toLowerCase() === selectedCategory;
 
       });
 
     }
 
 
-    // ==========================
-    // NO DATA
-    // ==========================
+    // --------------------------------------------------
+    // NO WORK
+    // --------------------------------------------------
 
-    if (!data.length) {
+    if (!works.length) {
 
       portfolio.innerHTML = `
         <div style="
@@ -166,33 +248,56 @@ async function loadPortfolio(category = "all") {
       `;
 
       return;
+
     }
 
 
-    // ==========================
-    // CREATE PORTFOLIO CARDS
-    // ==========================
+    // --------------------------------------------------
+    // CREATE CARDS
+    // --------------------------------------------------
 
-    portfolio.innerHTML = data.map(item => {
+    portfolio.innerHTML = works.map(item => {
+
 
       const title =
-        escapeHTML(item.title || "STJ Media Project");
+        escapeHTML(
+          item.title ||
+          "STJ Media Project"
+        );
+
 
       const categoryName =
-        escapeHTML(item.category || "Work");
+        escapeHTML(
+          item.category ||
+          "Work"
+        );
+
 
       const description =
-        escapeHTML(item.description || "");
+        escapeHTML(
+          item.description ||
+          ""
+        );
+
 
       const mediaURL =
-        escapeHTML(item.media_url || "");
+        escapeHTML(
+          item.media_url ||
+          ""
+        );
+
 
       let mediaHTML = "";
 
 
+      // ------------------------------------------------
       // VIDEO
+      // ------------------------------------------------
+
       if (
-        String(item.media_type || "").toLowerCase() === "video"
+        String(
+          item.media_type || ""
+        ).toLowerCase() === "video"
       ) {
 
         mediaHTML = `
@@ -206,13 +311,17 @@ async function loadPortfolio(category = "all") {
               height:100%;
               object-fit:cover;
               display:block;
-            ">
-          </video>
+            "
+          ></video>
         `;
 
       }
 
+
+      // ------------------------------------------------
       // IMAGE
+      // ------------------------------------------------
+
       else {
 
         mediaHTML = `
@@ -225,11 +334,16 @@ async function loadPortfolio(category = "all") {
               height:100%;
               object-fit:cover;
               display:block;
-            ">
+            "
+          >
         `;
 
       }
 
+
+      // ------------------------------------------------
+      // CARD
+      // ------------------------------------------------
 
       return `
         <article class="portfolio-card reveal show">
@@ -245,7 +359,10 @@ async function loadPortfolio(category = "all") {
 
           </div>
 
-          <div style="padding:18px 4px;">
+
+          <div style="
+            padding:18px 4px;
+          ">
 
             <small style="
               color:#888;
@@ -255,11 +372,13 @@ async function loadPortfolio(category = "all") {
               ${categoryName}
             </small>
 
+
             <h3 style="
               margin:7px 0 4px;
             ">
               ${title}
             </h3>
+
 
             ${
               description
@@ -282,12 +401,17 @@ async function loadPortfolio(category = "all") {
     }).join("");
 
 
+    // Re-run reveal for newly created cards
+    startReveal();
+
+
   } catch (error) {
 
     console.error(
-      "STJ MEDIA ERROR:",
+      "STJ MEDIA PORTFOLIO ERROR:",
       error
     );
+
 
     portfolio.innerHTML = `
       <div style="
@@ -305,23 +429,33 @@ async function loadPortfolio(category = "all") {
 }
 
 
-// ==========================
+// ======================================================
 // FILTER BUTTONS
-// ==========================
+// ======================================================
 
 filters.forEach(button => {
 
   button.addEventListener("click", () => {
 
+
+    // Remove active from all
     filters.forEach(btn => {
       btn.classList.remove("active");
     });
 
+
+    // Add active to clicked button
     button.classList.add("active");
 
-    const category =
-      button.getAttribute("data-filter") || "all";
 
+    // Get category
+    const category =
+      button.getAttribute(
+        "data-filter"
+      ) || "all";
+
+
+    // Load selected category
     loadPortfolio(category);
 
   });
@@ -329,8 +463,8 @@ filters.forEach(button => {
 });
 
 
-// ==========================
-// INITIAL PORTFOLIO LOAD
-// ==========================
+// ======================================================
+// INITIAL LOAD
+// ======================================================
 
 loadPortfolio("all");
