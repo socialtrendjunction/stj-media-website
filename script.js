@@ -1,845 +1,329 @@
 // ======================================================
-// STJ MEDIA — PUBLIC WEBSITE SCRIPT
-// Portfolio + Dynamic Team
+// STJ MEDIA — FINAL PUBLIC WEBSITE SCRIPT
 // ======================================================
 
-const SUPABASE_URL =
-  "https://acuszwigwpfrumkhtdeh.supabase.co";
+const SUPABASE_URL = "https://acuszwigwpfrumkhtdeh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
 
-const SUPABASE_KEY =
-  "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
-
-// ======================================================
-// SUPABASE CLIENT
-// ======================================================
-
-let supabaseClientPromise = null;
-
-function getSupabaseClient() {
-  if (supabaseClientPromise) {
-    return supabaseClientPromise;
-  }
-
-  supabaseClientPromise = new Promise((resolve, reject) => {
-    if (window.supabase) {
-      resolve(
-        window.supabase.createClient(
-          SUPABASE_URL,
-          SUPABASE_KEY
-        )
-      );
-      return;
-    }
-
+function loadSupabase() {
+  return new Promise((resolve, reject) => {
+    if (window.supabase) { resolve(window.supabase); return; }
     const script = document.createElement("script");
-
-    script.src =
-      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-
+    script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
     script.onload = () => {
-      if (!window.supabase) {
-        reject(
-          new Error("Supabase library not available.")
-        );
-        return;
-      }
-
-      resolve(
-        window.supabase.createClient(
-          SUPABASE_URL,
-          SUPABASE_KEY
-        )
-      );
+      if (window.supabase) resolve(window.supabase);
+      else reject(new Error("Supabase library not available."));
     };
-
-    script.onerror = () => {
-      reject(
-        new Error(
-          "Supabase library could not load."
-        )
-      );
-    };
-
+    script.onerror = () => reject(new Error("Supabase library could not load."));
     document.head.appendChild(script);
   });
-
-  return supabaseClientPromise;
 }
 
-// ======================================================
-// ELEMENTS
-// ======================================================
+const portfolio = document.getElementById("portfolio");
+const filters = document.querySelectorAll(".filter");
 
-const portfolio =
-  document.getElementById("portfolio");
-
-const teamGrid =
-  document.getElementById("team-grid");
-
-const filters =
-  document.querySelectorAll(".filter");
-
-// ======================================================
-// MOBILE MENU
-// ======================================================
-
-const menu =
-  document.querySelector(".menu");
-
-const nav =
-  document.querySelector(".nav nav");
-
+const menu = document.querySelector(".menu");
+const nav = document.querySelector(".nav nav");
 if (menu && nav) {
-  menu.addEventListener("click", () => {
-    nav.classList.toggle("open");
-  });
+  menu.addEventListener("click", () => nav.classList.toggle("open"));
 }
-
-// ======================================================
-// HTML ESCAPE
-// ======================================================
 
 function escapeHTML(value) {
   return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
-
-// ======================================================
-// SAFE URL
-// ======================================================
-
-function safeURL(value) {
-  const valueString =
-    String(value || "").trim();
-
-  if (!valueString) {
-    return "";
-  }
-
-  try {
-    const url =
-      new URL(valueString);
-
-    if (
-      url.protocol === "http:" ||
-      url.protocol === "https:"
-    ) {
-      return escapeHTML(url.href);
-    }
-
-    return "";
-  } catch {
-    return "";
-  }
-}
-
-// ======================================================
-// SCROLL REVEAL
-// ======================================================
 
 function startReveal() {
-  const items =
-    document.querySelectorAll(".reveal");
-
-  if (!items.length) {
+  const items = document.querySelectorAll(".reveal");
+  if (!items.length) return;
+  if (!("IntersectionObserver" in window)) {
+    items.forEach(item => item.classList.add("show"));
     return;
   }
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("show");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  items.forEach(item => observer.observe(item));
+}
 
-  if (
-    !("IntersectionObserver" in window)
-  ) {
-    items.forEach(item => {
-      item.classList.add("show");
+// ======================================================
+// LIGHTBOX (full-size photo/video viewer)
+// ======================================================
+
+function injectLightboxStyles(){
+  if(document.getElementById("stj-lightbox-style")) return;
+  const style = document.createElement("style");
+  style.id = "stj-lightbox-style";
+  style.textContent = `
+    .stj-lb-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);display:flex;
+      align-items:center;justify-content:center;z-index:9999;opacity:0;
+      transition:opacity .28s ease, background .28s ease;padding:24px;box-sizing:border-box;}
+    .stj-lb-overlay.stj-lb-show{opacity:1;background:rgba(0,0,0,.92);}
+    .stj-lb-box{max-width:92vw;max-height:88vh;transform:scale(.92);
+      transition:transform .28s ease;display:flex;flex-direction:column;align-items:center;}
+    .stj-lb-overlay.stj-lb-show .stj-lb-box{transform:scale(1);}
+    .stj-lb-box img{max-width:92vw;max-height:78vh;border-radius:14px;display:block;object-fit:contain;}
+    .stj-lb-box video{max-width:92vw;max-height:70vh;border-radius:14px;display:block;background:#000;}
+    .stj-lb-close{position:fixed;top:18px;right:18px;width:42px;height:42px;border-radius:50%;
+      background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;
+      font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .stj-vc{margin-top:12px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.15);border-radius:30px;padding:8px 14px;width:min(92vw,520px);}
+    .stj-vc button{background:transparent;border:0;color:#fff;font-size:16px;cursor:pointer;
+      width:auto;padding:4px 6px;flex:none;}
+    .stj-vc input[type=range]{flex:1;accent-color:#d7ff45;}
+    .stj-vc .stj-vc-time{color:#aaa;font-size:12px;min-width:70px;text-align:center;flex:none;}
+    .stj-vc select{width:auto;flex:none;background:#111;color:#fff;border:1px solid #333;
+      border-radius:8px;padding:4px 6px;font-size:12px;}
+  `;
+  document.head.appendChild(style);
+}
+
+function formatTime(sec){
+  if(!isFinite(sec)) return "0:00";
+  const m = Math.floor(sec/60);
+  const s = Math.floor(sec%60).toString().padStart(2,"0");
+  return `${m}:${s}`;
+}
+
+function openLightbox(mediaUrl, mediaType, title){
+  injectLightboxStyles();
+
+  const overlay = document.createElement("div");
+  overlay.className = "stj-lb-overlay";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "stj-lb-close";
+  closeBtn.innerHTML = "&times;";
+  closeBtn.setAttribute("aria-label","Close");
+
+  const box = document.createElement("div");
+  box.className = "stj-lb-box";
+
+  function close(){
+    overlay.classList.remove("stj-lb-show");
+    setTimeout(()=> overlay.remove(), 250);
+    document.removeEventListener("keydown", onKey);
+  }
+  function onKey(e){ if(e.key === "Escape") close(); }
+
+  closeBtn.addEventListener("click", close);
+  overlay.addEventListener("click", (e)=>{ if(e.target === overlay) close(); });
+  document.addEventListener("keydown", onKey);
+
+  if(mediaType === "video"){
+    const video = document.createElement("video");
+    video.src = mediaUrl;
+    video.playsInline = true;
+    video.setAttribute("aria-label", title || "Video");
+
+    const controls = document.createElement("div");
+    controls.className = "stj-vc";
+
+    const playBtn = document.createElement("button");
+    playBtn.textContent = "▶";
+
+    const seek = document.createElement("input");
+    seek.type = "range"; seek.min = "0"; seek.max = "100"; seek.value = "0";
+
+    const time = document.createElement("span");
+    time.className = "stj-vc-time";
+    time.textContent = "0:00 / 0:00";
+
+    const speed = document.createElement("select");
+    ["0.5","1","1.25","1.5","2"].forEach(r=>{
+      const opt = document.createElement("option");
+      opt.value = r; opt.textContent = r+"x";
+      if(r==="1") opt.selected = true;
+      speed.appendChild(opt);
     });
 
-    return;
-  }
+    const muteBtn = document.createElement("button");
+    muteBtn.textContent = "🔊";
 
-  const observer =
-    new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add(
-              "show"
-            );
+    const fsBtn = document.createElement("button");
+    fsBtn.textContent = "⛶";
 
-            observer.unobserve(
-              entry.target
-            );
-          }
-        });
-      },
-      {
-        threshold: 0.12
+    playBtn.addEventListener("click", ()=>{
+      if(video.paused){ video.play(); } else { video.pause(); }
+    });
+    video.addEventListener("play", ()=> playBtn.textContent = "⏸");
+    video.addEventListener("pause", ()=> playBtn.textContent = "▶");
+
+    video.addEventListener("timeupdate", ()=>{
+      if(video.duration){
+        seek.value = String((video.currentTime/video.duration)*100);
       }
-    );
+      time.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+    });
+    seek.addEventListener("input", ()=>{
+      if(video.duration){
+        video.currentTime = (Number(seek.value)/100)*video.duration;
+      }
+    });
 
-  items.forEach(item => {
-    observer.observe(item);
-  });
+    speed.addEventListener("change", ()=>{
+      video.playbackRate = Number(speed.value);
+    });
+
+    muteBtn.addEventListener("click", ()=>{
+      video.muted = !video.muted;
+      muteBtn.textContent = video.muted ? "🔇" : "🔊";
+    });
+
+    fsBtn.addEventListener("click", ()=>{
+      if(video.requestFullscreen) video.requestFullscreen();
+    });
+
+    controls.appendChild(playBtn);
+    controls.appendChild(seek);
+    controls.appendChild(time);
+    controls.appendChild(speed);
+    controls.appendChild(muteBtn);
+    controls.appendChild(fsBtn);
+
+    box.appendChild(video);
+    box.appendChild(controls);
+
+    overlay.appendChild(box);
+    overlay.appendChild(closeBtn);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(()=> overlay.classList.add("stj-lb-show"));
+
+    video.play().catch(()=>{});
+
+  } else {
+    const img = document.createElement("img");
+    img.src = mediaUrl;
+    img.alt = title || "";
+    box.appendChild(img);
+
+    overlay.appendChild(box);
+    overlay.appendChild(closeBtn);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(()=> overlay.classList.add("stj-lb-show"));
+  }
 }
 
 // ======================================================
 // LOAD PORTFOLIO
 // ======================================================
 
-async function loadPortfolio(
-  category = "all"
-) {
-  if (!portfolio) {
-    console.error(
-      "STJ MEDIA: #portfolio not found."
-    );
-
-    return;
-  }
+async function loadPortfolio(category = "all") {
+  if (!portfolio) { console.error("STJ MEDIA: #portfolio not found."); return; }
 
   portfolio.innerHTML = `
-    <div style="
-      grid-column:1/-1;
-      padding:40px;
-      text-align:center;
-      color:#888;
-    ">
+    <div style="grid-column:1/-1;padding:40px;text-align:center;color:#888;">
       Loading work...
     </div>
   `;
 
   try {
-    const supabase =
-      await getSupabaseClient();
+    const supabaseLibrary = await loadSupabase();
+    const supabaseClient = supabaseLibrary.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const {
-      data,
-      error
-    } = await supabase
+    const { data, error } = await supabaseClient
       .from("portfolio")
-      .select(`
-        id,
-        title,
-        category,
-        description,
-        media_url,
-        media_type,
-        created_at
-      `)
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      );
+      .select("id,title,category,description,media_url,media_type,status,created_at")
+      .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error(
-        "STJ MEDIA PORTFOLIO ERROR:",
-        error
-      );
+    if (error) { console.error("STJ MEDIA SUPABASE ERROR:", error); throw error; }
 
-      throw error;
-    }
+    let works = Array.isArray(data) ? data : [];
 
-    let works =
-      Array.isArray(data)
-        ? data
-        : [];
+    // Hide archived items from the public site (missing/NULL status = still published)
+    works = works.filter(item => item.status !== "archived");
 
-    // CATEGORY FILTER
     if (category !== "all") {
-      const selectedCategory =
-        String(category)
-          .toLowerCase();
-
-      works =
-        works.filter(item => {
-          return (
-            String(
-              item.category || ""
-            ).toLowerCase() ===
-            selectedCategory
-          );
-        });
+      const selectedCategory = String(category).toLowerCase();
+      works = works.filter(item => String(item.category || "").toLowerCase() === selectedCategory);
     }
 
-    // NO WORK
     if (!works.length) {
       portfolio.innerHTML = `
-        <div style="
-          grid-column:1/-1;
-          padding:50px;
-          text-align:center;
-          color:#888;
-        ">
+        <div style="grid-column:1/-1;padding:50px;text-align:center;color:#888;">
           No work added yet.
         </div>
       `;
-
       return;
     }
 
-    // RENDER WORK
-    portfolio.innerHTML =
-      works
-        .map(item => {
+    portfolio.innerHTML = works.map(item => {
+      const title = escapeHTML(item.title || "STJ Media Project");
+      const categoryName = escapeHTML(item.category || "Work");
+      const description = escapeHTML(item.description || "");
+      const mediaURL = escapeHTML(item.media_url || "");
+      const isVideo = String(item.media_type || "").toLowerCase() === "video";
 
-          const title =
-            escapeHTML(
-              item.title ||
-              "STJ Media Project"
-            );
+      let mediaHTML = "";
+      if (isVideo) {
+        mediaHTML = `
+          <video src="${mediaURL}" muted playsinline preload="metadata"
+            style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;"></video>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+            <div style="width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.55);
+              display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;">▶</div>
+          </div>
+        `;
+      } else {
+        mediaHTML = `
+          <img src="${mediaURL}" alt="${title}" loading="lazy"
+            onerror="this.style.display='none';"
+            style="width:100%;height:100%;object-fit:cover;display:block;">
+        `;
+      }
 
-          const categoryName =
-            escapeHTML(
-              item.category ||
-              "Work"
-            );
+      return `
+        <article class="portfolio-card reveal show" data-url="${mediaURL}" data-type="${isVideo?'video':'image'}" data-title="${title}" style="cursor:pointer;">
+          <div style="aspect-ratio:4/3;overflow:hidden;background:#111;border-radius:16px;position:relative;">
+            ${mediaHTML}
+          </div>
+          <div style="padding:18px 4px;">
+            <small style="color:#888;text-transform:uppercase;letter-spacing:1px;">${categoryName}</small>
+            <h3 style="margin:7px 0 4px;">${title}</h3>
+            ${description ? `<p style="color:#888;margin:0;">${description}</p>` : ""}
+          </div>
+        </article>
+      `;
+    }).join("");
 
-          const description =
-            escapeHTML(
-              item.description ||
-              ""
-            );
-
-          const mediaURL =
-            safeURL(
-              item.media_url
-            );
-
-          let mediaHTML = "";
-
-          // VIDEO
-          if (
-            String(
-              item.media_type || ""
-            ).toLowerCase() ===
-            "video"
-          ) {
-
-            mediaHTML = `
-              <video
-                src="${mediaURL}"
-                controls
-                playsinline
-                preload="metadata"
-                style="
-                  width:100%;
-                  height:100%;
-                  object-fit:cover;
-                  display:block;
-                  background:#111;
-                "
-              ></video>
-            `;
-
-          } else {
-
-            // IMAGE
-            mediaHTML = `
-              <img
-                src="${mediaURL}"
-                alt="${title}"
-                loading="lazy"
-                style="
-                  width:100%;
-                  height:100%;
-                  object-fit:cover;
-                  display:block;
-                "
-                onerror="
-                  this.style.display='none';
-                "
-              >
-            `;
-          }
-
-          return `
-            <article
-              class="portfolio-card reveal show"
-            >
-
-              <div style="
-                aspect-ratio:4/3;
-                overflow:hidden;
-                background:#111;
-                border-radius:16px;
-              ">
-
-                ${mediaHTML}
-
-              </div>
-
-              <div style="
-                padding:18px 4px;
-              ">
-
-                <small style="
-                  color:#888;
-                  text-transform:uppercase;
-                  letter-spacing:1px;
-                ">
-                  ${categoryName}
-                </small>
-
-                <h3 style="
-                  margin:7px 0 4px;
-                ">
-                  ${title}
-                </h3>
-
-                ${
-                  description
-                    ? `
-                      <p style="
-                        color:#888;
-                        margin:0;
-                      ">
-                        ${description}
-                      </p>
-                    `
-                    : ""
-                }
-
-              </div>
-
-            </article>
-          `;
-        })
-        .join("");
+    portfolio.querySelectorAll(".portfolio-card").forEach(card=>{
+      card.addEventListener("click", ()=>{
+        openLightbox(card.dataset.url, card.dataset.type, card.dataset.title);
+      });
+    });
 
     startReveal();
-
-    console.log(
-      "STJ MEDIA: Portfolio loaded.",
-      works
-    );
+    console.log("STJ MEDIA: Portfolio loaded successfully.", works);
 
   } catch (error) {
-
-    console.error(
-      "STJ MEDIA PORTFOLIO ERROR:",
-      error
-    );
-
+    console.error("STJ MEDIA PORTFOLIO ERROR:", error);
     portfolio.innerHTML = `
-      <div style="
-        grid-column:1/-1;
-        padding:40px;
-        text-align:center;
-        color:#ff7777;
-      ">
+      <div style="grid-column:1/-1;padding:40px;text-align:center;color:#ff7777;">
         Portfolio load nahi ho pa raha.
       </div>
     `;
   }
 }
 
-// ======================================================
-// LOAD TEAM
-// ======================================================
-
-async function loadTeam() {
-
-  if (!teamGrid) {
-    console.warn(
-      "STJ MEDIA: #team-grid not found."
-    );
-
-    return;
-  }
-
-  teamGrid.innerHTML = `
-    <div style="
-      grid-column:1/-1;
-      padding:40px;
-      text-align:center;
-      color:#888;
-    ">
-      Loading team...
-    </div>
-  `;
-
-  try {
-
-    const supabase =
-      await getSupabaseClient();
-
-    const {
-      data,
-      error
-    } = await supabase
-      .from("team_members")
-      .select(`
-        id,
-        name,
-        photo_url,
-        role,
-        work,
-        skills,
-        instagram_url,
-        linkedin_url,
-        display_order,
-        created_at
-      `)
-      .eq(
-        "status",
-        "live"
-      )
-      .order(
-        "display_order",
-        {
-          ascending: true
-        }
-      )
-      .order(
-        "created_at",
-        {
-          ascending: true
-        }
-      );
-
-    if (error) {
-
-      console.error(
-        "STJ MEDIA TEAM ERROR:",
-        error
-      );
-
-      throw error;
-    }
-
-    const members =
-      Array.isArray(data)
-        ? data
-        : [];
-
-    // NO TEAM MEMBERS
-    if (!members.length) {
-
-      teamGrid.innerHTML = `
-        <div style="
-          grid-column:1/-1;
-          padding:50px;
-          text-align:center;
-          color:#888;
-        ">
-          Team members will appear here.
-        </div>
-      `;
-
-      return;
-    }
-
-    // RENDER TEAM
-    teamGrid.innerHTML =
-      members
-        .map((member, index) => {
-
-          const name =
-            escapeHTML(
-              member.name ||
-              "STJ Team"
-            );
-
-          const role =
-            escapeHTML(
-              member.role ||
-              ""
-            );
-
-          const work =
-            escapeHTML(
-              member.work ||
-              ""
-            );
-
-          const skills =
-            escapeHTML(
-              member.skills ||
-              ""
-            );
-
-          const photoURL =
-            safeURL(
-              member.photo_url
-            );
-
-          const instagram =
-            safeURL(
-              member.instagram_url
-            );
-
-          const linkedin =
-            safeURL(
-              member.linkedin_url
-            );
-
-          const firstLetter =
-            escapeHTML(
-              (
-                member.name ||
-                "S"
-              )
-                .trim()
-                .charAt(0)
-                .toUpperCase()
-            );
-
-          let photoHTML = "";
-
-          if (photoURL) {
-
-            photoHTML = `
-              <img
-                src="${photoURL}"
-                alt="${name}"
-                loading="lazy"
-                style="
-                  width:100%;
-                  height:100%;
-                  object-fit:cover;
-                  display:block;
-                "
-                onerror="
-                  this.style.display='none';
-                  this.nextElementSibling.style.display='flex';
-                "
-              >
-
-              <span
-                style="
-                  display:none;
-                  width:100%;
-                  height:100%;
-                  align-items:center;
-                  justify-content:center;
-                  font-size:48px;
-                  font-weight:700;
-                "
-              >
-                ${firstLetter}
-              </span>
-            `;
-
-          } else {
-
-            photoHTML = `
-              <span
-                style="
-                  display:flex;
-                  width:100%;
-                  height:100%;
-                  align-items:center;
-                  justify-content:center;
-                  font-size:48px;
-                  font-weight:700;
-                "
-              >
-                ${firstLetter}
-              </span>
-            `;
-          }
-
-          let socialHTML = "";
-
-          if (
-            instagram ||
-            linkedin
-          ) {
-
-            socialHTML = `
-              <div style="
-                display:flex;
-                gap:12px;
-                margin-top:14px;
-              ">
-
-                ${
-                  instagram
-                    ? `
-                      <a
-                        href="${instagram}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style="
-                          text-decoration:none;
-                        "
-                      >
-                        Instagram ↗
-                      </a>
-                    `
-                    : ""
-                }
-
-                ${
-                  linkedin
-                    ? `
-                      <a
-                        href="${linkedin}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style="
-                          text-decoration:none;
-                        "
-                      >
-                        LinkedIn ↗
-                      </a>
-                    `
-                    : ""
-                }
-
-              </div>
-            `;
-          }
-
-          return `
-            <article
-              class="team reveal"
-            >
-
-              <div
-                class="team-photo"
-                style="
-                  overflow:hidden;
-                  position:relative;
-                "
-              >
-                ${photoHTML}
-              </div>
-
-              <div>
-
-                <small>
-                  ${String(
-                    index + 1
-                  ).padStart(2, "0")}
-                </small>
-
-                <h3>
-                  ${name}
-                </h3>
-
-                ${
-                  role
-                    ? `
-                      <p>
-                        ${role}
-                      </p>
-                    `
-                    : ""
-                }
-
-                ${
-                  work
-                    ? `
-                      <p style="
-                        margin-top:8px;
-                        color:#888;
-                      ">
-                        ${work}
-                      </p>
-                    `
-                    : ""
-                }
-
-                ${
-                  skills
-                    ? `
-                      <p style="
-                        margin-top:8px;
-                        color:#888;
-                        font-size:13px;
-                      ">
-                        ${skills}
-                      </p>
-                    `
-                    : ""
-                }
-
-                ${socialHTML}
-
-              </div>
-
-            </article>
-          `;
-        })
-        .join("");
-
-    startReveal();
-
-    console.log(
-      "STJ MEDIA: Team loaded.",
-      members
-    );
-
-  } catch (error) {
-
-    console.error(
-      "STJ MEDIA TEAM ERROR:",
-      error
-    );
-
-    teamGrid.innerHTML = `
-      <div style="
-        grid-column:1/-1;
-        padding:40px;
-        text-align:center;
-        color:#ff7777;
-      ">
-        Team load nahi ho pa raha.
-      </div>
-    `;
-  }
-}
-
-// ======================================================
-// FILTER BUTTONS
-// ======================================================
-
 filters.forEach(button => {
-
-  button.addEventListener(
-    "click",
-    () => {
-
-      filters.forEach(btn => {
-        btn.classList.remove(
-          "active"
-        );
-      });
-
-      button.classList.add(
-        "active"
-      );
-
-      const category =
-        button.getAttribute(
-          "data-filter"
-        ) || "all";
-
-      loadPortfolio(
-        category
-      );
-    }
-  );
-
+  button.addEventListener("click", () => {
+    filters.forEach(btn => btn.classList.remove("active"));
+    button.classList.add("active");
+    const category = button.getAttribute("data-filter") || "all";
+    loadPortfolio(category);
+  });
 });
 
-// ======================================================
-// INITIAL LOAD
-// ======================================================
+// Agar koi invite/confirm/recovery link home page pe khul jaye, use admin.html pe bhej do
+if (location.hash && /token=/.test(location.hash)) {
+  location.replace("/admin.html" + location.hash);
+}
 
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-
-    loadPortfolio("all");
-
-    loadTeam();
-
-  }
-);
+loadPortfolio("all");
