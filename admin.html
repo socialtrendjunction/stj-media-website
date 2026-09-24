@@ -158,6 +158,15 @@ h1{font-size:30px}
 </div>
 
 
+<script>
+window.addEventListener("error", function(e){
+  var box = document.createElement("div");
+  box.style.cssText = "position:fixed;top:0;left:0;right:0;background:#ff2d2d;color:#fff;padding:14px;font-size:13px;z-index:99999;white-space:pre-wrap;";
+  box.textContent = "JS ERROR: " + e.message + " (line " + e.lineno + ")";
+  document.body.appendChild(box);
+});
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -523,11 +532,4 @@ ${item.skills ? `<p class="muted" style="margin-top:8px">${escapeHTML(item.skill
 `;
 }).join("");
 
-teamList.querySelectorAll("[data-edit]").forEach(btn=>{
-btn.addEventListener("click",()=>editMember(btn.dataset.edit));
-});
-teamList.querySelectorAll("[data-archive-member]").forEach(btn=>{
-btn.addEventListener("click",()=>toggleMemberArchive(btn.dataset.archiveMember, btn.dataset.status));
-});
-teamList.querySelectorAll("[data-delete-member]").forEach(btn=>{
-btn.addEventListener("click",()=>deleteMember(btn.dataset.deleteM
+teamList.querySelectorAll("[data-edit]").forEach(
