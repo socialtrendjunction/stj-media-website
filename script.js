@@ -321,9 +321,71 @@ filters.forEach(button => {
   });
 });
 
+// ======================================================
+// LOAD TEAM
+// ======================================================
+
+async function loadTeam(){
+  const teamGrid = document.getElementById("team-grid");
+  if(!teamGrid) return;
+
+  teamGrid.innerHTML = `<div style="grid-column:1/-1;padding:30px;text-align:center;color:#888;">Loading team...</div>`;
+
+  try{
+    const supabaseLibrary = await loadSupabase();
+    const supabaseClient = supabaseLibrary.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const { data, error } = await supabaseClient
+      .from("team_members")
+      .select("id,name,role,work,skills,photo_url,instagram_url,linkedin_url,display_order,status")
+      .order("display_order", { ascending: true });
+
+    if(error){ console.error("STJ MEDIA TEAM ERROR:", error); throw error; }
+
+    let members = Array.isArray(data) ? data : [];
+    members = members.filter(m => m.status !== "archived");
+
+    if(!members.length){
+      teamGrid.innerHTML = `<div style="grid-column:1/-1;padding:30px;text-align:center;color:#888;">Team coming soon.</div>`;
+      return;
+    }
+
+    teamGrid.innerHTML = members.map((m, i) => {
+      const name = escapeHTML(m.name || "");
+      const role = escapeHTML(m.role || "");
+      const photo = m.photo_url
+        ? `<img src="${escapeHTML(m.photo_url)}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : escapeHTML((m.name||"?")[0]);
+
+      const socials = [];
+      if(m.instagram_url) socials.push(`<a href="${escapeHTML(m.instagram_url)}" target="_blank" rel="noopener" style="color:#888;margin-right:10px;">Instagram</a>`);
+      if(m.linkedin_url) socials.push(`<a href="${escapeHTML(m.linkedin_url)}" target="_blank" rel="noopener" style="color:#888;">LinkedIn</a>`);
+
+      return `
+        <article class="team reveal show">
+          <div class="team-photo" style="overflow:hidden;">${photo}</div>
+          <div>
+            <small>0${i+1}</small>
+            <h3>${name}</h3>
+            <p>${role}</p>
+            ${socials.length ? `<div style="margin-top:8px;font-size:13px;">${socials.join("")}</div>` : ""}
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    startReveal();
+
+  }catch(error){
+    console.error("STJ MEDIA TEAM LOAD ERROR:", error);
+    teamGrid.innerHTML = `<div style="grid-column:1/-1;padding:30px;text-align:center;color:#ff7777;">Team load nahi ho pa raha.</div>`;
+  }
+}
+
 // Agar koi invite/confirm/recovery link home page pe khul jaye, use admin.html pe bhej do
 if (location.hash && /token=/.test(location.hash)) {
   location.replace("/admin.html" + location.hash);
 }
 
 loadPortfolio("all");
+loadTeam();
