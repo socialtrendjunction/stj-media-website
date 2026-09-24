@@ -29,6 +29,9 @@ button:disabled{opacity:.5}
 .error{color:#ff7070;margin-top:15px}
 .dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:20px}
 .logout{width:auto;padding:12px 20px;background:transparent;color:#fff;border:1px solid #444}
+.tabs{display:flex;gap:10px;margin-top:25px;flex-wrap:wrap}
+.tabbtn{width:auto;padding:11px 20px;background:transparent;color:#fff;border:1px solid #333;border-radius:24px;font-size:14px}
+.tabbtn.active{background:#fff;color:#000}
 .work-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:20px}
 .work{background:#0d0d0d;border:1px solid #292929;border-radius:14px;overflow:hidden;position:relative}
 .work.archived{opacity:.5}
@@ -42,6 +45,7 @@ button:disabled{opacity:.5}
 .work-actions button{width:auto;flex:1;padding:10px;font-size:13px;font-weight:600}
 .btn-archive{background:transparent;color:#fff;border:1px solid #444}
 .btn-delete{background:transparent;color:#ff7070;border:1px solid #522}
+.team-photo{width:90px;height:90px;border-radius:50%;object-fit:cover;background:#111;display:block;margin:0 auto 12px;border:1px solid #333}
 @media(max-width:600px){
 .wrap{padding:15px}
 .card{padding:22px}
@@ -78,10 +82,18 @@ h1{font-size:30px}
 <div>
 <p class="eyebrow">STJ MEDIA</p>
 <h1>Admin Dashboard</h1>
-<p class="muted">Upload and manage your portfolio.</p>
+<p class="muted">Manage your portfolio and team.</p>
 </div>
 <button id="logoutBtn" class="logout">Logout</button>
 </div>
+
+<div class="tabs">
+<button class="tabbtn active" data-tab="portfolioTab">Portfolio</button>
+<button class="tabbtn" data-tab="teamTab">Team</button>
+</div>
+
+
+<div id="portfolioTab">
 
 <div class="card">
 <h2>Add New Work</h2>
@@ -108,6 +120,39 @@ h1{font-size:30px}
 </div>
 </div>
 
+</div>
+
+
+<div id="teamTab" class="hidden">
+
+<div class="card">
+<h2 id="teamFormTitle">Add Team Member</h2>
+<p class="muted">Name, role, work, skills, socials and a photo.</p>
+<input id="tmId" type="hidden">
+<input id="tmName" type="text" placeholder="Full name">
+<input id="tmRole" type="text" placeholder="Role (e.g. Graphic Design · Editing)">
+<input id="tmWork" type="text" placeholder="Work focus (e.g. Design, Reels)">
+<input id="tmSkills" type="text" placeholder="Skills, comma separated">
+<input id="tmInstagram" type="text" placeholder="Instagram URL (optional)">
+<input id="tmLinkedin" type="text" placeholder="LinkedIn URL (optional)">
+<input id="tmOrder" type="number" placeholder="Display order (e.g. 1, 2, 3...)">
+<input id="tmPhoto" type="file" accept="image/*">
+<div id="tmFileName" class="file-name"></div>
+<button id="tmSaveBtn">Save Team Member</button>
+<button id="tmCancelBtn" class="logout" style="margin-top:8px">Clear / Cancel Edit</button>
+<div id="tmMessage"></div>
+</div>
+
+<div class="card">
+<h2>Current Team</h2>
+<p class="muted">Archive hides a member from the public site without deleting them.</p>
+<div id="teamList" class="work-list">
+<p class="muted">Loading...</p>
+</div>
+</div>
+
+</div>
+
 </section>
 
 </div>
@@ -129,26 +174,16 @@ const loginBtn=document.getElementById("loginBtn");
 const logoutBtn=document.getElementById("logoutBtn");
 const errorBox=document.getElementById("error");
 
-const titleInput=document.getElementById("title");
-const categoryInput=document.getElementById("category");
-const descriptionInput=document.getElementById("description");
-const mediaFile=document.getElementById("mediaFile");
-const uploadBtn=document.getElementById("uploadBtn");
-const message=document.getElementById("message");
-const workList=document.getElementById("workList");
-const fileName=document.getElementById("fileName");
-
 function showDashboard(){
 loginBox.classList.add("hidden");
 dashboard.classList.remove("hidden");
 loadWorks();
+loadTeam();
 }
-
 function showLogin(){
 loginBox.classList.remove("hidden");
 dashboard.classList.add("hidden");
 }
-
 async function checkUser(){
 const {data:{session}} = await supabaseClient.auth.getSession();
 if(session){ showDashboard(); } else { showLogin(); }
@@ -181,6 +216,33 @@ await supabaseClient.auth.signOut();
 email.value=""; password.value="";
 showLogin();
 });
+
+function escapeHTML(value){
+return String(value ?? "")
+.replaceAll("&","&amp;").replaceAll("<","&lt;")
+.replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+
+// ---------------- TABS ----------------
+document.querySelectorAll(".tabbtn").forEach(btn=>{
+btn.addEventListener("click",()=>{
+document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));
+btn.classList.add("active");
+document.getElementById("portfolioTab").classList.toggle("hidden", btn.dataset.tab!=="portfolioTab");
+document.getElementById("teamTab").classList.toggle("hidden", btn.dataset.tab!=="teamTab");
+});
+});
+
+// ================= PORTFOLIO =================
+
+const titleInput=document.getElementById("title");
+const categoryInput=document.getElementById("category");
+const descriptionInput=document.getElementById("description");
+const mediaFile=document.getElementById("mediaFile");
+const uploadBtn=document.getElementById("uploadBtn");
+const message=document.getElementById("message");
+const workList=document.getElementById("workList");
+const fileName=document.getElementById("fileName");
 
 mediaFile.addEventListener("change",()=>{
 fileName.innerText = mediaFile.files.length ? mediaFile.files[0].name : "";
@@ -235,8 +297,8 @@ uploadBtn.disabled=false;
 uploadBtn.innerText="Upload & Publish";
 });
 
-function pathFromUrl(url){
-const marker="/storage/v1/object/public/STJ-MEDIA/";
+function pathFromUrl(url, bucket){
+const marker="/storage/v1/object/public/"+bucket+"/";
 const idx=(url||"").indexOf(marker);
 if(idx===-1) return null;
 return decodeURIComponent(url.substring(idx+marker.length));
@@ -245,10 +307,8 @@ return decodeURIComponent(url.substring(idx+marker.length));
 async function deleteWork(id, mediaUrl){
 if(!confirm("Ye work permanently delete karna hai? Ye wapas nahi aayega.")) return;
 try{
-const path = pathFromUrl(mediaUrl);
-if(path){
-await supabaseClient.storage.from("STJ-MEDIA").remove([path]);
-}
+const path = pathFromUrl(mediaUrl, "STJ-MEDIA");
+if(path){ await supabaseClient.storage.from("STJ-MEDIA").remove([path]); }
 const {error} = await supabaseClient.from("portfolio").delete().eq("id", id);
 if(error) throw error;
 await loadWorks();
@@ -270,26 +330,17 @@ alert("Update failed: "+(err.message||"Unknown error"));
 
 async function loadWorks(){
 workList.innerHTML='<p class="muted">Loading...</p>';
-
 const {data,error} = await supabaseClient
 .from("portfolio").select("*").order("created_at",{ascending:false});
 
-if(error){
-workList.innerHTML=`<p class="error">${escapeHTML(error.message)}</p>`;
-return;
-}
-
-if(!data || !data.length){
-workList.innerHTML='<p class="muted">Abhi koi work publish nahi hua.</p>';
-return;
-}
+if(error){ workList.innerHTML=`<p class="error">${escapeHTML(error.message)}</p>`; return; }
+if(!data || !data.length){ workList.innerHTML='<p class="muted">Abhi koi work publish nahi hua.</p>'; return; }
 
 workList.innerHTML=data.map(item=>{
 const isArchived = item.status === "archived";
 const media = item.media_type==="video"
 ? `<video class="work-media" src="${escapeHTML(item.media_url)}" controls playsinline></video>`
 : `<img class="work-media" src="${escapeHTML(item.media_url)}" alt="${escapeHTML(item.title)}">`;
-
 return `
 <div class="work ${isArchived?'archived':''}">
 ${isArchived ? '<span class="badge">ARCHIVED</span>' : ''}
@@ -315,19 +366,168 @@ btn.addEventListener("click",()=>deleteWork(btn.dataset.delete, btn.dataset.url)
 });
 }
 
-function escapeHTML(value){
-return String(value)
-.replaceAll("&","&amp;").replaceAll("<","&lt;")
-.replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-}
+// ================= TEAM =================
 
-supabaseClient.auth.onAuthStateChange((event,session)=>{
-if(session){ showDashboard(); } else { showLogin(); }
+const tmId=document.getElementById("tmId");
+const tmName=document.getElementById("tmName");
+const tmRole=document.getElementById("tmRole");
+const tmWork=document.getElementById("tmWork");
+const tmSkills=document.getElementById("tmSkills");
+const tmInstagram=document.getElementById("tmInstagram");
+const tmLinkedin=document.getElementById("tmLinkedin");
+const tmOrder=document.getElementById("tmOrder");
+const tmPhoto=document.getElementById("tmPhoto");
+const tmFileName=document.getElementById("tmFileName");
+const tmSaveBtn=document.getElementById("tmSaveBtn");
+const tmCancelBtn=document.getElementById("tmCancelBtn");
+const tmMessage=document.getElementById("tmMessage");
+const teamList=document.getElementById("teamList");
+const teamFormTitle=document.getElementById("teamFormTitle");
+
+tmPhoto.addEventListener("change",()=>{
+tmFileName.innerText = tmPhoto.files.length ? tmPhoto.files[0].name : "";
 });
 
-checkUser();
+function resetTeamForm(){
+tmId.value=""; tmName.value=""; tmRole.value=""; tmWork.value="";
+tmSkills.value=""; tmInstagram.value=""; tmLinkedin.value="";
+tmOrder.value=""; tmPhoto.value=""; tmFileName.innerText="";
+teamFormTitle.innerText="Add Team Member";
+}
+tmCancelBtn.addEventListener("click", resetTeamForm);
 
-</script>
+tmSaveBtn.addEventListener("click", async()=>{
+tmMessage.innerText=""; tmMessage.className="";
+const name=tmName.value.trim();
+if(!name){ tmMessage.className="error"; tmMessage.innerText="Naam enter karo."; return; }
 
-</body>
-</html>
+tmSaveBtn.disabled=true;
+tmSaveBtn.innerText="Saving...";
+
+try{
+const {data:{user}} = await supabaseClient.auth.getUser();
+if(!user){ throw new Error("Admin session expired. Dobara login karo."); }
+
+const payload = {
+name: name,
+role: tmRole.value.trim() || null,
+work: tmWork.value.trim() || null,
+skills: tmSkills.value.trim() || null,
+instagram_url: tmInstagram.value.trim() || null,
+linkedin_url: tmLinkedin.value.trim() || null,
+display_order: tmOrder.value ? Number(tmOrder.value) : null,
+status: "active"
+};
+
+const file = tmPhoto.files[0];
+if(file){
+const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,"-");
+const filePath = "team-"+Date.now()+"-"+Math.random().toString(36).substring(2,8)+"-"+safeName;
+const {error:uploadError} = await supabaseClient.storage
+.from("STJ-MEDIA").upload(filePath, file, {cacheControl:"3600", upsert:false});
+if(uploadError) throw uploadError;
+const {data:publicData} = supabaseClient.storage.from("STJ-MEDIA").getPublicUrl(filePath);
+payload.photo_url = publicData.publicUrl;
+}
+
+if(tmId.value){
+const {error} = await supabaseClient.from("team_members").update(payload).eq("id", tmId.value);
+if(error) throw error;
+} else {
+const {error} = await supabaseClient.from("team_members").insert(payload);
+if(error) throw error;
+}
+
+tmMessage.className="success";
+tmMessage.innerText="✅ Team member saved!";
+resetTeamForm();
+await loadTeam();
+
+}catch(err){
+console.error(err);
+tmMessage.className="error";
+tmMessage.innerText="Save failed: "+(err.message||"Unknown error");
+}
+
+tmSaveBtn.disabled=false;
+tmSaveBtn.innerText="Save Team Member";
+});
+
+async function editMember(id){
+const {data,error} = await supabaseClient.from("team_members").select("*").eq("id", id).single();
+if(error){ alert("Load failed: "+error.message); return; }
+tmId.value = data.id;
+tmName.value = data.name || "";
+tmRole.value = data.role || "";
+tmWork.value = data.work || "";
+tmSkills.value = data.skills || "";
+tmInstagram.value = data.instagram_url || "";
+tmLinkedin.value = data.linkedin_url || "";
+tmOrder.value = data.display_order ?? "";
+teamFormTitle.innerText = "Edit Team Member";
+window.scrollTo({top:0, behavior:"smooth"});
+}
+
+async function deleteMember(id, photoUrl){
+if(!confirm("Is team member ko permanently delete karna hai?")) return;
+try{
+const path = pathFromUrl(photoUrl, "STJ-MEDIA");
+if(path){ await supabaseClient.storage.from("STJ-MEDIA").remove([path]); }
+const {error} = await supabaseClient.from("team_members").delete().eq("id", id);
+if(error) throw error;
+await loadTeam();
+}catch(err){
+alert("Delete failed: "+(err.message||"Unknown error"));
+}
+}
+
+async function toggleMemberArchive(id, currentStatus){
+const newStatus = currentStatus === "archived" ? "active" : "archived";
+try{
+const {error} = await supabaseClient.from("team_members").update({status:newStatus}).eq("id", id);
+if(error) throw error;
+await loadTeam();
+}catch(err){
+alert("Update failed: "+(err.message||"Unknown error"));
+}
+}
+
+async function loadTeam(){
+teamList.innerHTML='<p class="muted">Loading...</p>';
+const {data,error} = await supabaseClient
+.from("team_members").select("*").order("display_order",{ascending:true});
+
+if(error){ teamList.innerHTML=`<p class="error">${escapeHTML(error.message)}</p>`; return; }
+if(!data || !data.length){ teamList.innerHTML='<p class="muted">Abhi koi team member add nahi hua.</p>'; return; }
+
+teamList.innerHTML=data.map(item=>{
+const isArchived = item.status === "archived";
+const photo = item.photo_url
+? `<img class="team-photo" src="${escapeHTML(item.photo_url)}" alt="${escapeHTML(item.name)}">`
+: `<div class="team-photo" style="display:flex;align-items:center;justify-content:center;font-size:26px;">${escapeHTML((item.name||"?")[0])}</div>`;
+return `
+<div class="work ${isArchived?'archived':''}">
+${isArchived ? '<span class="badge">ARCHIVED</span>' : ''}
+<div class="work-info" style="text-align:center;padding-top:20px">
+${photo}
+<h3>${escapeHTML(item.name)}</h3>
+<small>${escapeHTML(item.role||"")}</small>
+${item.skills ? `<p class="muted" style="margin-top:8px">${escapeHTML(item.skills)}</p>` : ""}
+</div>
+<div class="work-actions">
+<button class="btn-archive" data-edit="${item.id}">Edit</button>
+<button class="btn-archive" data-archive-member="${item.id}" data-status="${item.status||'active'}">${isArchived?'Unarchive':'Archive'}</button>
+<button class="btn-delete" data-delete-member="${item.id}" data-url="${escapeHTML(item.photo_url||'')}">Delete</button>
+</div>
+</div>
+`;
+}).join("");
+
+teamList.querySelectorAll("[data-edit]").forEach(btn=>{
+btn.addEventListener("click",()=>editMember(btn.dataset.edit));
+});
+teamList.querySelectorAll("[data-archive-member]").forEach(btn=>{
+btn.addEventListener("click",()=>toggleMemberArchive(btn.dataset.archiveMember, btn.dataset.status));
+});
+teamList.querySelectorAll("[data-delete-member]").forEach(btn=>{
+btn.addEventListener("click",()=>deleteMember(btn.dataset.deleteM
