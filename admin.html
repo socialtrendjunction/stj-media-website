@@ -97,7 +97,7 @@ h1{font-size:30px}
 
 <div class="card">
 <h2>Add New Work</h2>
-<p class="muted">Upload a photo or video and publish it to your portfolio.</p>
+<p class="muted">Upload a photo, and optionally link its Instagram Reel.</p>
 <input id="title" type="text" placeholder="Project title">
 <select id="category">
 <option value="design">Graphic Design</option>
@@ -106,8 +106,9 @@ h1{font-size:30px}
 <option value="social">Social Media</option>
 </select>
 <textarea id="description" placeholder="Short description (optional)"></textarea>
-<input id="mediaFile" type="file" accept="image/*,video/*">
+<input id="mediaFile" type="file" accept="image/*">
 <div id="fileName" class="file-name"></div>
+<input id="reelLink" type="text" placeholder="Instagram Reel link (optional)">
 <button id="uploadBtn">Upload & Publish</button>
 <div id="message"></div>
 </div>
@@ -248,6 +249,7 @@ const titleInput=document.getElementById("title");
 const categoryInput=document.getElementById("category");
 const descriptionInput=document.getElementById("description");
 const mediaFile=document.getElementById("mediaFile");
+const reelLink=document.getElementById("reelLink");
 const uploadBtn=document.getElementById("uploadBtn");
 const message=document.getElementById("message");
 const workList=document.getElementById("workList");
@@ -263,9 +265,10 @@ const title=titleInput.value.trim();
 const category=categoryInput.value;
 const description=descriptionInput.value.trim();
 const file=mediaFile.files[0];
+const reelUrl=reelLink.value.trim();
 
 if(!title){ message.className="error"; message.innerText="Project title enter karo."; return; }
-if(!file){ message.className="error"; message.innerText="Photo ya video select karo."; return; }
+if(!file){ message.className="error"; message.innerText="Photo select karo."; return; }
 
 uploadBtn.disabled=true;
 uploadBtn.innerText="Uploading...";
@@ -283,17 +286,16 @@ if(uploadError){ throw uploadError; }
 
 const {data:publicData} = supabaseClient.storage.from("STJ-MEDIA").getPublicUrl(filePath);
 const mediaUrl=publicData.publicUrl;
-const mediaType = file.type.startsWith("video/") ? "video" : "image";
 
 const {error:dbError} = await supabaseClient.from("portfolio").insert({
 title:title, category:category, description:description || null,
-media_url:mediaUrl, media_type:mediaType, status:"published"
+media_url:mediaUrl, media_type:"image", reel_url: reelUrl || null, status:"published"
 });
 if(dbError){ throw dbError; }
 
 message.className="success";
 message.innerText="✅ Work successfully published!";
-titleInput.value=""; descriptionInput.value=""; mediaFile.value=""; fileName.innerText="";
+titleInput.value=""; descriptionInput.value=""; mediaFile.value=""; fileName.innerText=""; reelLink.value="";
 await loadWorks();
 
 }catch(err){
@@ -425,7 +427,7 @@ skills: tmSkills.value.trim() || null,
 instagram_url: tmInstagram.value.trim() || null,
 linkedin_url: tmLinkedin.value.trim() || null,
 display_order: tmOrder.value ? Number(tmOrder.value) : null,
-status: "active"
+status: "live"
 };
 
 const file = tmPhoto.files[0];
@@ -491,7 +493,7 @@ alert("Delete failed: "+(err.message||"Unknown error"));
 }
 
 async function toggleMemberArchive(id, currentStatus){
-const newStatus = currentStatus === "archived" ? "active" : "archived";
+const newStatus = currentStatus === "archive" ? "live" : "archive";
 try{
 const {error} = await supabaseClient.from("team_members").update({status:newStatus}).eq("id", id);
 if(error) throw error;
@@ -510,7 +512,7 @@ if(error){ teamList.innerHTML=`<p class="error">${escapeHTML(error.message)}</p>
 if(!data || !data.length){ teamList.innerHTML='<p class="muted">Abhi koi team member add nahi hua.</p>'; return; }
 
 teamList.innerHTML=data.map(item=>{
-const isArchived = item.status === "archived";
+const isArchived = item.status === "archive";
 const photo = item.photo_url
 ? `<img class="team-photo" src="${escapeHTML(item.photo_url)}" alt="${escapeHTML(item.name)}">`
 : `<div class="team-photo" style="display:flex;align-items:center;justify-content:center;font-size:26px;">${escapeHTML((item.name||"?")[0])}</div>`;
@@ -525,31 +527,5 @@ ${item.skills ? `<p class="muted" style="margin-top:8px">${escapeHTML(item.skill
 </div>
 <div class="work-actions">
 <button class="btn-archive" data-edit="${item.id}">Edit</button>
-<button class="btn-archive" data-archive-member="${item.id}" data-status="${item.status||'active'}">${isArchived?'Unarchive':'Archive'}</button>
-<button class="btn-delete" data-delete-member="${item.id}" data-url="${escapeHTML(item.photo_url||'')}">Delete</button>
-</div>
-</div>
-`;
-}).join("");
-
-teamList.querySelectorAll("[data-edit]").forEach(btn=>{
-btn.addEventListener("click",()=>editMember(btn.dataset.edit));
-});
-teamList.querySelectorAll("[data-archive-member]").forEach(btn=>{
-btn.addEventListener("click",()=>toggleMemberArchive(btn.dataset.archiveMember, btn.dataset.status));
-});
-teamList.querySelectorAll("[data-delete-member]").forEach(btn=>{
-btn.addEventListener("click",()=>deleteMember(btn.dataset.deleteMember, btn.dataset.url));
-});
-}
-
-supabaseClient.auth.onAuthStateChange((event,session)=>{
-if(session){ showDashboard(); } else { showLogin(); }
-});
-
-checkUser();
-
-</script>
-
-</body>
-</html>
+<button class="btn-archive" data-archive-member="${item.id}" data-status="${item.status||'live'}">${isArchived?'Unarchive':'Archive'}</button>
+<button c
