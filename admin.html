@@ -71,7 +71,7 @@ h1{font-size:30px}
 <p class="muted">Login with your STJ Media admin account.</p>
 <input id="email" type="email" placeholder="Admin email">
 <input id="password" type="password" placeholder="Password">
-<button id="loginBtn">Login to Dashboard</button>
+<button id="loginBtn" onclick="alert('Button clicked! Ab check karenge login kyun nahi ho raha.')">Login to Dashboard</button>
 <p id="error"></p>
 </section>
 
@@ -527,9 +527,4 @@ ${item.skills ? `<p class="muted" style="margin-top:8px">${escapeHTML(item.skill
 <button class="btn-archive" data-edit="${item.id}">Edit</button>
 <button class="btn-archive" data-archive-member="${item.id}" data-status="${item.status||'active'}">${isArchived?'Unarchive':'Archive'}</button>
 <button class="btn-delete" data-delete-member="${item.id}" data-url="${escapeHTML(item.photo_url||'')}">Delete</button>
-</div>
-</div>
-`;
-}).join("");
-
-teamList.querySelectorAll("[data-edit]").forEach(
+</d
