@@ -527,4 +527,29 @@ ${item.skills ? `<p class="muted" style="margin-top:8px">${escapeHTML(item.skill
 <button class="btn-archive" data-edit="${item.id}">Edit</button>
 <button class="btn-archive" data-archive-member="${item.id}" data-status="${item.status||'active'}">${isArchived?'Unarchive':'Archive'}</button>
 <button class="btn-delete" data-delete-member="${item.id}" data-url="${escapeHTML(item.photo_url||'')}">Delete</button>
-</d
+</div>
+</div>
+`;
+}).join("");
+
+teamList.querySelectorAll("[data-edit]").forEach(btn=>{
+btn.addEventListener("click",()=>editMember(btn.dataset.edit));
+});
+teamList.querySelectorAll("[data-archive-member]").forEach(btn=>{
+btn.addEventListener("click",()=>toggleMemberArchive(btn.dataset.archiveMember, btn.dataset.status));
+});
+teamList.querySelectorAll("[data-delete-member]").forEach(btn=>{
+btn.addEventListener("click",()=>deleteMember(btn.dataset.deleteMember, btn.dataset.url));
+});
+}
+
+supabaseClient.auth.onAuthStateChange((event,session)=>{
+if(session){ showDashboard(); } else { showLogin(); }
+});
+
+checkUser();
+
+</script>
+
+</body>
+</html>
