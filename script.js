@@ -1,0 +1,347 @@
+// ======================================================
+// STJ MEDIA — FINAL PUBLIC WEBSITE SCRIPT
+// ======================================================
+
+const SUPABASE_URL = "https://acuszwigwpfrumkhtdeh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nXq7buM0ASGpEvRq_12VDQ_yLUkGIo2";
+
+function loadSupabase() {
+  return new Promise((resolve, reject) => {
+    if (window.supabase) {
+      resolve(window.supabase);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+
+    script.onload = () => {
+      if (window.supabase) {
+        resolve(window.supabase);
+      } else {
+        reject(new Error("Supabase library not available."));
+      }
+    };
+
+    script.onerror = () => {
+      reject(new Error("Supabase library could not load."));
+    };
+
+    document.head.appendChild(script);
+  });
+}
+
+const portfolio = document.getElementById("portfolio");
+const filters = document.querySelectorAll(".filter");
+
+const menu = document.querySelector(".menu");
+const nav = document.querySelector(".nav nav");
+
+if (menu && nav) {
+  menu.addEventListener("click", () => {
+    nav.classList.toggle("open");
+  });
+}
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function startReveal() {
+  const items = document.querySelectorAll(".reveal");
+
+  if (!items.length) return;
+
+  if (!("IntersectionObserver" in window)) {
+    items.forEach(item => item.classList.add("show"));
+    return;
+  }
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("show");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  items.forEach(item => observer.observe(item));
+}
+
+
+// ======================================================
+// LIGHTBOX
+// ======================================================
+
+function injectLightboxStyles() {
+  if (document.getElementById("stj-lightbox-style")) return;
+
+  const style = document.createElement("style");
+
+  style.id = "stj-lightbox-style";
+
+  style.textContent = `
+    .stj-lb-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      opacity:0;
+      transition:opacity .28s ease, background .28s ease;
+      padding:24px;
+      box-sizing:border-box;
+    }
+
+    .stj-lb-overlay.stj-lb-show{
+      opacity:1;
+      background:rgba(0,0,0,.92);
+    }
+
+    .stj-lb-box{
+      max-width:92vw;
+      max-height:88vh;
+      transform:scale(.92);
+      transition:transform .28s ease;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+
+    .stj-lb-overlay.stj-lb-show .stj-lb-box{
+      transform:scale(1);
+    }
+
+    .stj-lb-box img{
+      max-width:92vw;
+      max-height:78vh;
+      border-radius:14px;
+      display:block;
+      object-fit:contain;
+    }
+
+    .stj-lb-box video{
+      max-width:92vw;
+      max-height:70vh;
+      border-radius:14px;
+      display:block;
+      background:#000;
+    }
+
+    .stj-lb-close{
+      position:fixed;
+      top:18px;
+      right:18px;
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:rgba(255,255,255,.1);
+      border:1px solid rgba(255,255,255,.25);
+      color:#fff;
+      font-size:22px;
+      line-height:1;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .stj-vc{
+      margin-top:12px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:30px;
+      padding:8px 14px;
+      width:min(92vw,520px);
+    }
+
+    .stj-vc button{
+      background:transparent;
+      border:0;
+      color:#fff;
+      font-size:16px;
+      cursor:pointer;
+      width:auto;
+      padding:4px 6px;
+      flex:none;
+    }
+
+    .stj-vc input[type=range]{
+      flex:1;
+      accent-color:#d7ff45;
+    }
+
+    .stj-vc .stj-vc-time{
+      color:#aaa;
+      font-size:12px;
+      min-width:70px;
+      text-align:center;
+      flex:none;
+    }
+
+    .stj-vc select{
+      width:auto;
+      flex:none;
+      background:#111;
+      color:#fff;
+      border:1px solid #333;
+      border-radius:8px;
+      padding:4px 6px;
+      font-size:12px;
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
+function formatTime(sec) {
+  if (!isFinite(sec)) return "0:00";
+
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60)
+    .toString()
+    .padStart(2, "0");
+
+  return `${m}:${s}`;
+}
+
+function openLightbox(mediaUrl, mediaType, title) {
+
+  injectLightboxStyles();
+
+  const overlay = document.createElement("div");
+  overlay.className = "stj-lb-overlay";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "stj-lb-close";
+  closeBtn.innerHTML = "&times;";
+  closeBtn.setAttribute("aria-label", "Close");
+
+  const box = document.createElement("div");
+  box.className = "stj-lb-box";
+
+  function close() {
+    overlay.classList.remove("stj-lb-show");
+
+    setTimeout(() => {
+      overlay.remove();
+    }, 250);
+
+    document.removeEventListener("keydown", onKey);
+  }
+
+  function onKey(e) {
+    if (e.key === "Escape") close();
+  }
+
+  closeBtn.addEventListener("click", close);
+
+  overlay.addEventListener("click", e => {
+    if (e.target === overlay) close();
+  });
+
+  document.addEventListener("keydown", onKey);
+
+  if (mediaType === "video") {
+
+    const video = document.createElement("video");
+
+    video.src = mediaUrl;
+    video.playsInline = true;
+    video.setAttribute("aria-label", title || "Video");
+
+    const controls = document.createElement("div");
+    controls.className = "stj-vc";
+
+    const playBtn = document.createElement("button");
+    playBtn.textContent = "▶";
+
+    const seek = document.createElement("input");
+    seek.type = "range";
+    seek.min = "0";
+    seek.max = "100";
+    seek.value = "0";
+
+    const time = document.createElement("span");
+    time.className = "stj-vc-time";
+    time.textContent = "0:00 / 0:00";
+
+    const speed = document.createElement("select");
+
+    ["0.5", "1", "1.25", "1.5", "2"].forEach(r => {
+
+      const opt = document.createElement("option");
+
+      opt.value = r;
+      opt.textContent = r + "x";
+
+      if (r === "1") {
+        opt.selected = true;
+      }
+
+      speed.appendChild(opt);
+    });
+
+    const muteBtn = document.createElement("button");
+    muteBtn.textContent = "🔊";
+
+    const fsBtn = document.createElement("button");
+    fsBtn.textContent = "⛶";
+
+    playBtn.addEventListener("click", () => {
+
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+
+    });
+
+    video.addEventListener("play", () => {
+      playBtn.textContent = "⏸";
+    });
+
+    video.addEventListener("pause", () => {
+      playBtn.textContent = "▶";
+    });
+
+    video.addEventListener("timeupdate", () => {
+
+      if (video.duration) {
+        seek.value = String(
+          (video.currentTime / video.duration) * 100
+        );
+      }
+
+      time.textContent =
+        `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+    });
+
+    seek.addEventListener("input", () => {
+
+      if (video.duration) {
+        video.currentTime =
+          (Number(seek.value) / 100) * video.duration;
+      }
+
+    });
+
+    speed.addEventListener("change", () => {
+      video.playbackRate = Number(speed.value);
+    });
+
+    muteBtn.addEventListener("click", () => {
+
+      video.m
