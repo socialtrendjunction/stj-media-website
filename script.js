@@ -667,7 +667,7 @@ if (reviewSubmitBtn) {
 
     if (error) {
       console.error(error);
-      reviewMessage.textContent = "Submit failed, please try again.";
+      reviewMessage.textContent = "Submit failed: " + (error.message || "Unknown error");
       reviewMessage.className = "review-message error";
       return;
     }
